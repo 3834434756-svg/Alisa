@@ -34,18 +34,30 @@ jobs:
 
       - name: Download SPM dependencies as local sources
         run: |
+          set -x
           cd $GITHUB_WORKSPACE
           mkdir -p .deps
-          git clone --depth 1 --branch v6.29.0 https://github.com/groue/GRDB.swift.git .deps/GRDB 2>/dev/null || \
-            git clone --depth 1 --branch 6.29.0 https://github.com/groue/GRDB.swift.git .deps/GRDB 2>/dev/null || \
-            git clone --depth 1 https://github.com/groue/GRDB.swift.git .deps/GRDB
-          git clone --depth 1 --branch 0.9.19 https://github.com/weichsel/ZIPFoundation.git .deps/ZIPFoundation 2>/dev/null || \
-            git clone --depth 1 https://github.com/weichsel/ZIPFoundation.git .deps/ZIPFoundation
-          git clone --depth 1 --branch 3.5.4 https://github.com/swisspol/GCDWebServer.git .deps/GCDWebServer 2>/dev/null || \
-            git clone --depth 1 https://github.com/swisspol/GCDWebServer.git .deps/GCDWebServer
-          git clone --depth 1 --branch 2.1.0 https://github.com/raspu/Highlightr.git .deps/Highlightr 2>/dev/null || \
-            git clone --depth 1 https://github.com/raspu/Highlightr.git .deps/Highlightr
-          rm -rf .deps/GRDB/.git .deps/ZIPFoundation/.git .deps/GCDWebServer/.git .deps/Highlightr/.git
+
+          rm -rf .deps/GRDB
+          git clone --depth 1 https://github.com/groue/GRDB.swift.git .deps/GRDB
+
+          rm -rf .deps/ZIPFoundation
+          git clone --depth 1 https://github.com/weichsel/ZIPFoundation.git .deps/ZIPFoundation
+
+          rm -rf .deps/GCDWebServer
+          git clone --depth 1 https://github.com/swisspol/GCDWebServer.git .deps/GCDWebServer
+
+          rm -rf .deps/Highlightr
+          git clone --depth 1 https://github.com/raspu/Highlightr.git .deps/Highlightr
+
+          # Debug: list source directories
+          echo "=== Source directories ==="
+          for dir in .deps/*/; do
+            echo "--- $dir ---"
+            find "$dir" -name "*.swift" -o -name "*.m" -o -name "*.h" -o -name "*.modulemap" 2>/dev/null | head -10
+          done
+
+          rm -rf .deps/GRDB/.git .deps/ZIPFoundation/.git .deps/GCDWebServer/.git .deps/Highlightr/.git 2>/dev/null || true
 
       - name: Generate Xcode Project
         run: |
