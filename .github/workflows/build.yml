@@ -30,21 +30,21 @@ jobs:
 
       - name: Select Xcode
         run: |
-          sudo xcode-select -s /Applications/Xcode.app
+          # List available Xcode versions
+          ls /Applications/ | grep Xcode
+          # Use Xcode 16.2 instead of 16.4 to avoid package resolution bug
+          if [ -d "/Applications/Xcode_16.2.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_16.2.app
+          elif [ -d "/Applications/Xcode_16.1.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_16.1.app
+          else
+            sudo xcode-select -s /Applications/Xcode.app
+          fi
           xcodebuild -version
-          swift --version
 
       - name: Install XcodeGen
         run: |
           brew install xcodegen
-
-      - name: Prepare SPM
-        run: |
-          cd $GITHUB_WORKSPACE
-          # Create symlink for Xcode package resolution bug
-          sudo ln -sf "$GITHUB_WORKSPACE/Package.swift" /Package.swift
-          # Resolve packages first
-          swift package resolve
 
       - name: Generate Xcode Project
         run: |
@@ -70,7 +70,6 @@ jobs:
             -archivePath build/Alisa.xcarchive \
             -configuration ${{ github.event.inputs.configuration || 'Debug' }} \
             -destination 'generic/platform=iOS' \
-            -clonedSourcePackagesDirPath .spm \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO
