@@ -45,7 +45,9 @@ jobs:
       - name: Pre-resolve SPM
         run: |
           cd $GITHUB_WORKSPACE
-          swift package resolve
+          pwd
+          ls -la Package.swift
+          swift package resolve --package-path .
 
       - name: Build (Archive)
         run: |
