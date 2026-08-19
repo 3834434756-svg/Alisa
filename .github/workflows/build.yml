@@ -31,6 +31,8 @@ jobs:
       - name: Select Xcode
         run: |
           sudo xcode-select -s /Applications/Xcode.app
+          which swift
+          swift --version
           xcodebuild -version
 
       - name: Install XcodeGen
@@ -42,12 +44,18 @@ jobs:
           rm -rf Alisa.xcodeproj Alisa.xcworkspace
           xcodegen generate
 
-      - name: Pre-resolve SPM
+      - name: Build (Archive)
         run: |
           cd $GITHUB_WORKSPACE
-          pwd
-          ls -la Package.swift
-          swift package resolve --package-path .
+          xcodebuild archive \
+            -project Alisa.xcodeproj \
+            -scheme Alisa \
+            -archivePath build/Alisa.xcarchive \
+            -configuration Debug \
+            -destination 'generic/platform=iOS' \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
 
       - name: Build (Archive)
         run: |
