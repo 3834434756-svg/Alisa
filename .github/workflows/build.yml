@@ -38,6 +38,14 @@ jobs:
         run: |
           brew install xcodegen
 
+      - name: Prepare SPM
+        run: |
+          cd $GITHUB_WORKSPACE
+          # Create symlink for Xcode package resolution bug
+          sudo ln -sf "$GITHUB_WORKSPACE/Package.swift" /Package.swift
+          # Resolve packages first
+          swift package resolve
+
       - name: Generate Xcode Project
         run: |
           cd $GITHUB_WORKSPACE
@@ -62,6 +70,7 @@ jobs:
             -archivePath build/Alisa.xcarchive \
             -configuration ${{ github.event.inputs.configuration || 'Debug' }} \
             -destination 'generic/platform=iOS' \
+            -clonedSourcePackagesDirPath .spm \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO
