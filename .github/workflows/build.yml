@@ -30,13 +30,10 @@ jobs:
 
       - name: Select Xcode
         run: |
-          # List available Xcode versions
           ls /Applications/ | grep Xcode
-          # Use Xcode 16.2 instead of 16.4 to avoid package resolution bug
-          if [ -d "/Applications/Xcode_16.2.app" ]; then
-            sudo xcode-select -s /Applications/Xcode_16.2.app
-          elif [ -d "/Applications/Xcode_16.1.app" ]; then
-            sudo xcode-select -s /Applications/Xcode_16.1.app
+          # Use Xcode 16.0 to avoid SPM resolution bug in 16.2+
+          if [ -d "/Applications/Xcode_16.0.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_16.0.app
           else
             sudo xcode-select -s /Applications/Xcode.app
           fi
@@ -60,6 +57,11 @@ jobs:
           echo '<Workspace version="1.0">' >> Alisa.xcworkspace/contents.xcworkspacedata
           echo '   <FileRef location="group:Alisa.xcodeproj"/>' >> Alisa.xcworkspace/contents.xcworkspacedata
           echo '</Workspace>' >> Alisa.xcworkspace/contents.xcworkspacedata
+
+      - name: Copy Package.swift to root
+        run: |
+          sudo cp "$GITHUB_WORKSPACE/Package.swift" /Package.swift
+          sudo chmod 644 /Package.swift
 
       - name: Build (Archive)
         run: |
