@@ -31,9 +31,11 @@ jobs:
       - name: Select Xcode
         run: |
           sudo xcode-select -s /Applications/Xcode.app
-          which swift
-          swift --version
+          TOOLCHAIN_PATH=$(xcode-select -p)/Toolchains/XcodeDefault.xctoolchain/usr/bin
+          echo "TOOLCHAIN_PATH=$TOOLCHAIN_PATH" >> $GITHUB_ENV
+          echo "PATH=$TOOLCHAIN_PATH:$PATH" >> $GITHUB_ENV
           xcodebuild -version
+          $TOOLCHAIN_PATH/swift --version
 
       - name: Install XcodeGen
         run: brew install xcodegen
@@ -43,6 +45,11 @@ jobs:
           cd $GITHUB_WORKSPACE
           rm -rf Alisa.xcodeproj Alisa.xcworkspace
           xcodegen generate
+
+      - name: Pre-resolve SPM
+        run: |
+          cd $GITHUB_WORKSPACE
+          swift package resolve
 
       - name: Build (Archive)
         run: |
