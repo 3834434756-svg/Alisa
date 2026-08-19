@@ -6,21 +6,6 @@ options:
   xcodeVersion: "16.0"
   developmentLanguage: zh-Hans
   createIntermediateGroups: true
-  xcodebuildCommand: /usr/bin/xcodebuild
-
-packages:
-  GRDB:
-    url: https://github.com/groue/GRDB.swift
-    from: 6.29.0
-  ZIPFoundation:
-    url: https://github.com/weichsel/ZIPFoundation
-    from: 0.9.19
-  GCDWebServer:
-    url: https://github.com/swisspol/GCDWebServer
-    from: 3.5.4
-  Highlightr:
-    url: https://github.com/raspu/Highlightr
-    from: 2.1.0
 
 settings:
   base:
@@ -52,26 +37,22 @@ targets:
     platform: iOS
     sources:
       - path: Sources/Core
-    dependencies:
-      - package: GRDB
-      - package: ZIPFoundation
-      - package: GCDWebServer
+      - path: .deps/GRDB/Sources/GRDB
+      - path: .deps/ZIPFoundation/Sources/ZIPFoundation
+      - path: .deps/GCDWebServer/GCDWebServer/Core
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.alisa.core
         SKIP_INSTALL: YES
+        HEADER_SEARCH_PATHS: $(SRCROOT)/.deps/GCDWebServer/GCDWebServer/Core
 
   AlisaUI:
     type: framework
     platform: iOS
     sources:
       - path: Sources/UI
-    dependencies:
-      - target: AlisaCore
-      - package: Highlightr
+      - path: .deps/Highlightr/Sources/Highlightr
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.alisa.ui
         SKIP_INSTALL: YES
-
-  # Test targets removed for CI build simplicity

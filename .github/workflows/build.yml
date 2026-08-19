@@ -15,10 +15,6 @@ on:
     tags:
       - 'v*'
 
-env:
-  PROJECT_NAME: Alisa
-  SCHEME: Alisa
-
 jobs:
   build:
     runs-on: macos-15
@@ -31,41 +27,26 @@ jobs:
       - name: Select Xcode
         run: |
           sudo xcode-select -s /Applications/Xcode.app
-          TOOLCHAIN_PATH=$(xcode-select -p)/Toolchains/XcodeDefault.xctoolchain/usr/bin
-          echo "TOOLCHAIN_PATH=$TOOLCHAIN_PATH" >> $GITHUB_ENV
-          echo "PATH=$TOOLCHAIN_PATH:$PATH" >> $GITHUB_ENV
           xcodebuild -version
-          $TOOLCHAIN_PATH/swift --version
 
       - name: Install XcodeGen
         run: brew install xcodegen
 
+      - name: Download SPM dependencies as local sources
+        run: |
+          cd $GITHUB_WORKSPACE
+          mkdir -p .deps
+          git clone --depth 1 --branch 6.29.0 https://github.com/groue/GRDB.swift.git .deps/GRDB
+          git clone --depth 1 --branch 0.9.19 https://github.com/weichsel/ZIPFoundation.git .deps/ZIPFoundation
+          git clone --depth 1 --branch 3.5.4 https://github.com/swisspol/GCDWebServer.git .deps/GCDWebServer
+          git clone --depth 1 --branch 2.1.0 https://github.com/raspu/Highlightr.git .deps/Highlightr
+          rm -rf .deps/GRDB/.git .deps/ZIPFoundation/.git .deps/GCDWebServer/.git .deps/Highlightr/.git
+
       - name: Generate Xcode Project
         run: |
           cd $GITHUB_WORKSPACE
-          rm -rf Alisa.xcodeproj Alisa.xcworkspace
+          rm -rf Alisa.xcodeproj
           xcodegen generate
-
-      - name: Pre-resolve SPM
-        run: |
-          cd $GITHUB_WORKSPACE
-          export SWIFT_PACKAGE_DIR="$GITHUB_WORKSPACE"
-          xcodebuild -resolvePackageDependencies \
-            -project Alisa.xcodeproj \
-            -scheme Alisa
-
-      - name: Build (Archive)
-        run: |
-          cd $GITHUB_WORKSPACE
-          xcodebuild archive \
-            -project Alisa.xcodeproj \
-            -scheme Alisa \
-            -archivePath build/Alisa.xcarchive \
-            -configuration Debug \
-            -destination 'generic/platform=iOS' \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
 
       - name: Build (Archive)
         run: |
