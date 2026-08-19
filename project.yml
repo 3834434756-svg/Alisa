@@ -55,18 +55,18 @@ targets:
     type: framework
     platform: iOS
     sources:
-      - path: .deps/GCDWebServer/Sources/GCDWebServer
+      - path: .deps/GCDWebServer/GCDWebServer/Core
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.alisa.gcd
         SKIP_INSTALL: YES
-        HEADER_SEARCH_PATHS: $(SRCROOT)/.deps/GCDWebServer/Sources
+        HEADER_SEARCH_PATHS: $(SRCROOT)/.deps/GCDWebServer/GCDWebServer/Core
 
   Highlightr:
     type: framework
     platform: iOS
     sources:
-      - path: .deps/Highlightr/Sources/Highlightr
+      - path: .deps/Highlightr/src/classes
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.alisa.highlightr
