@@ -34,8 +34,7 @@ jobs:
           xcodebuild -version
 
       - name: Install XcodeGen
-        run: |
-          brew install xcodegen
+        run: brew install xcodegen
 
       - name: Generate Xcode Project
         run: |
@@ -43,7 +42,7 @@ jobs:
           rm -rf Alisa.xcodeproj Alisa.xcworkspace
           xcodegen generate
 
-      - name: Pre-resolve SPM packages
+      - name: Pre-resolve SPM
         run: |
           cd $GITHUB_WORKSPACE
           swift package resolve
@@ -51,51 +50,11 @@ jobs:
       - name: Build (Archive)
         run: |
           cd $GITHUB_WORKSPACE
-
-          # Create workspace with proper package reference
-          mkdir -p Alisa.xcworkspace/xcshareddata
-          cat > Alisa.xcworkspace/contents.xcworkspacedata << 'XEOF'
-<?xml version="1.0" encoding="UTF-8"?>
-<Workspace version="1.0">
-   <FileRef location="group:Alisa.xcodeproj"/>
-   <FileRef location="group:./"/>
-</Workspace>
-XEOF
-
-          # Create xcshareddata scheme
-          mkdir -p Alisa.xcodeproj/xcshareddata/xcschemes
-          cat > Alisa.xcodeproj/xcshareddata/xcschemes/Alisa.xcscheme << 'XEOF'
-<?xml version="1.0" encoding="UTF-8"?>
-<Scheme version="1.0">
-   <BuildAction parallelizeBuildables="YES" buildImplicitDependencies="YES">
-      <BuildActionEntries>
-         <BuildActionEntry buildForTesting="YES" buildForRunning="YES" buildForProfiling="YES" buildForArchiving="YES" buildForAnalyzing="YES">
-            <BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="Alisa" BuildableName="Alisa.app" BlueprintName="Alisa" ReferencedContainer="container:Alisa.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
-      </BuildActionEntries>
-   </BuildAction>
-   <ArchiveAction buildConfiguration="Debug" revealArchiveInOrganizer="YES">
-   </ArchiveAction>
-</Scheme>
-XEOF
-
           xcodebuild archive \
-            -workspace Alisa.xcworkspace \
+            -project Alisa.xcodeproj \
             -scheme Alisa \
             -archivePath build/Alisa.xcarchive \
-            -configuration ${{ github.event.inputs.configuration || 'Debug' }} \
-            -destination 'generic/platform=iOS' \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
-        run: |
-          cd $GITHUB_WORKSPACE
-          xcodebuild archive \
-            -workspace Alisa.xcworkspace \
-            -scheme Alisa \
-            -archivePath build/Alisa.xcarchive \
-            -configuration ${{ github.event.inputs.configuration || 'Debug' }} \
+            -configuration Debug \
             -destination 'generic/platform=iOS' \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
@@ -108,12 +67,11 @@ XEOF
           cp -r build/Alisa.xcarchive/Products/Applications/Alisa.app build/Payload/
           cd build && zip -r Alisa-unsigned.ipa Payload
           rm -rf Payload
-          echo "IPA_PATH=build/Alisa-unsigned.ipa" >> $GITHUB_ENV
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
-          name: Alisa-${{ github.event.inputs.configuration || 'Debug' }}
-          path: ${{ env.IPA_PATH }}
+          name: Alisa-Debug
+          path: build/Alisa-unsigned.ipa
           compression-level: 0
           if-no-files-found: error
