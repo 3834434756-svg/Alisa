@@ -49,12 +49,12 @@ jobs:
       - name: Install XcodeGen
         run: |
           brew install xcodegen
-          cd /workspace/Alisa
+          cd $GITHUB_WORKSPACE
           make xcodegen
 
       - name: Resolve SPM Dependencies
         run: |
-          cd /workspace/Alisa
+          cd $GITHUB_WORKSPACE
           xcodebuild -resolvePackageDependencies \
             -project Alisa.xcodeproj \
             -scheme $SCHEME \
@@ -62,7 +62,7 @@ jobs:
 
       - name: Build
         run: |
-          cd /workspace/Alisa
+          cd $GITHUB_WORKSPACE
           BUILD_FLAGS=""
           if [ "${{ github.event.inputs.signing }}" = "unsigned" ]; then
             BUILD_FLAGS='CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO'
@@ -78,7 +78,7 @@ jobs:
 
       - name: Create IPA
         run: |
-          cd /workspace/Alisa
+          cd $GITHUB_WORKSPACE
           if [ "${{ github.event.inputs.signing }}" = "unsigned" ]; then
             mkdir -p build/Payload
             cp -r build/$PROJECT_NAME.xcarchive/Products/Applications/$PROJECT_NAME.app build/Payload/
