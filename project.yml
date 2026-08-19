@@ -35,7 +35,7 @@ targets:
     type: framework
     platform: iOS
     sources:
-      - path: .deps/GRDB/Sources/GRDB
+      - path: .deps/GRDB/Sources/GRDBSQLite
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.alisa.grdb
