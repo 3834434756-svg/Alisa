@@ -34,18 +34,15 @@ jobs:
           xcodebuild -version
           swift --version
 
-      - name: Create Xcode Project
+      - name: Install XcodeGen
         run: |
-          cd $GITHUB_WORKSPACE
-          python3 .github/scripts/create_project.py
+          brew install xcodegen
 
-      - name: Resolve Package Dependencies
+      - name: Generate Xcode Project
         run: |
           cd $GITHUB_WORKSPACE
-          xcodebuild -resolvePackageDependencies \
-            -project Alisa.xcodeproj \
-            -scheme Alisa \
-            -clonedSourcePackagesDirPath .spm
+          rm -f Alisa.xcodeproj/project.pbxproj
+          xcodegen generate
 
       - name: Build (Archive)
         run: |
@@ -58,9 +55,7 @@ jobs:
             -destination 'generic/platform=iOS' \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO \
-            CLANG_ENABLE_MODULES=YES \
-            SWIFT_ACTIVE_COMPILATION_CONDITIONS=DEBUG
+            CODE_SIGNING_ALLOWED=NO
 
       - name: Create IPA
         run: |
