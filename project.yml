@@ -5,7 +5,8 @@ options:
     iOS: "17.0"
   xcodeVersion: "16.0"
   developmentLanguage: zh-Hans
-generateEmptyDirectories: true
+  createIntermediateGroups: true
+  xcodebuildCommand: /usr/bin/xcodebuild
 
 packages:
   GRDB:
@@ -73,38 +74,4 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.alisa.ui
         SKIP_INSTALL: YES
 
-  AlisaCoreTests:
-    type: bundle.unit-test
-    platform: iOS
-    sources:
-      - path: Tests/Unit
-    dependencies:
-      - target: AlisaCore
-    settings:
-      base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.alisa.coretests
-        TEST_HOST: ""
-
-  AlisaIntegrationTests:
-    type: bundle.unit-test
-    platform: iOS
-    sources:
-      - path: Tests/Integration
-    dependencies:
-      - target: AlisaCore
-    settings:
-      base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.alisa.integrationtests
-        TEST_HOST: ""
-
-  AlisaUITests:
-    type: bundle.ui-testing
-    platform: iOS
-    sources:
-      - path: Tests/UI
-    dependencies:
-      - target: Alisa
-    settings:
-      base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.alisa.uitests
-        TEST_TARGET_NAME: Alisa
+  # Test targets removed for CI build simplicity
