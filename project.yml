@@ -30,28 +30,70 @@ targets:
         PRODUCT_NAME: Alisa
         DEVELOPMENT_TEAM: ""
         CODE_SIGN_STYLE: Automatic
-        CODE_SIGN_IDENTITY: Apple Development
+
+  GRDB:
+    type: framework
+    platform: iOS
+    sources:
+      - path: .deps/GRDB/Sources/GRDB
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.alisa.grdb
+        SKIP_INSTALL: YES
+
+  ZIPFoundation:
+    type: framework
+    platform: iOS
+    sources:
+      - path: .deps/ZIPFoundation/Sources/ZIPFoundation
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.alisa.zip
+        SKIP_INSTALL: YES
+
+  GCDWebServer:
+    type: framework
+    platform: iOS
+    sources:
+      - path: .deps/GCDWebServer/Sources/GCDWebServer
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.alisa.gcd
+        SKIP_INSTALL: YES
+        HEADER_SEARCH_PATHS: $(SRCROOT)/.deps/GCDWebServer/Sources
+
+  Highlightr:
+    type: framework
+    platform: iOS
+    sources:
+      - path: .deps/Highlightr/Sources/Highlightr
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.alisa.highlightr
+        SKIP_INSTALL: YES
 
   AlisaCore:
     type: framework
     platform: iOS
     sources:
       - path: Sources/Core
-      - path: .deps/GRDB/Sources/GRDB
-      - path: .deps/ZIPFoundation/Sources/ZIPFoundation
-      - path: .deps/GCDWebServer/GCDWebServer/Core
+    dependencies:
+      - target: GRDB
+      - target: ZIPFoundation
+      - target: GCDWebServer
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.alisa.core
         SKIP_INSTALL: YES
-        HEADER_SEARCH_PATHS: $(SRCROOT)/.deps/GCDWebServer/GCDWebServer/Core
 
   AlisaUI:
     type: framework
     platform: iOS
     sources:
       - path: Sources/UI
-      - path: .deps/Highlightr/Sources/Highlightr
+    dependencies:
+      - target: AlisaCore
+      - target: Highlightr
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.alisa.ui
