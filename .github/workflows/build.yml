@@ -52,14 +52,6 @@ jobs:
           cd $GITHUB_WORKSPACE
           make xcodegen
 
-      - name: Resolve SPM Dependencies
-        run: |
-          cd $GITHUB_WORKSPACE
-          xcodebuild -resolvePackageDependencies \
-            -project Alisa.xcodeproj \
-            -scheme $SCHEME \
-            -clonedSourcePackagesDirPath ~/Library/Developer/Xcode/DerivedData/SourcePackages
-
       - name: Build
         run: |
           cd $GITHUB_WORKSPACE
