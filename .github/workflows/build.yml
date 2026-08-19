@@ -36,10 +36,15 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE
           mkdir -p .deps
-          git clone --depth 1 --branch 6.29.0 https://github.com/groue/GRDB.swift.git .deps/GRDB
-          git clone --depth 1 --branch 0.9.19 https://github.com/weichsel/ZIPFoundation.git .deps/ZIPFoundation
-          git clone --depth 1 --branch 3.5.4 https://github.com/swisspol/GCDWebServer.git .deps/GCDWebServer
-          git clone --depth 1 --branch 2.1.0 https://github.com/raspu/Highlightr.git .deps/Highlightr
+          git clone --depth 1 --branch v6.29.0 https://github.com/groue/GRDB.swift.git .deps/GRDB 2>/dev/null || \
+            git clone --depth 1 --branch 6.29.0 https://github.com/groue/GRDB.swift.git .deps/GRDB 2>/dev/null || \
+            git clone --depth 1 https://github.com/groue/GRDB.swift.git .deps/GRDB
+          git clone --depth 1 --branch 0.9.19 https://github.com/weichsel/ZIPFoundation.git .deps/ZIPFoundation 2>/dev/null || \
+            git clone --depth 1 https://github.com/weichsel/ZIPFoundation.git .deps/ZIPFoundation
+          git clone --depth 1 --branch 3.5.4 https://github.com/swisspol/GCDWebServer.git .deps/GCDWebServer 2>/dev/null || \
+            git clone --depth 1 https://github.com/swisspol/GCDWebServer.git .deps/GCDWebServer
+          git clone --depth 1 --branch 2.1.0 https://github.com/raspu/Highlightr.git .deps/Highlightr 2>/dev/null || \
+            git clone --depth 1 https://github.com/raspu/Highlightr.git .deps/Highlightr
           rm -rf .deps/GRDB/.git .deps/ZIPFoundation/.git .deps/GCDWebServer/.git .deps/Highlightr/.git
 
       - name: Generate Xcode Project
