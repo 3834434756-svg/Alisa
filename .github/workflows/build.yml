@@ -44,31 +44,29 @@ jobs:
           rm -rf Alisa.xcodeproj Alisa.xcworkspace
           xcodegen generate
 
+      - name: Create Workspace
+        run: |
+          cd $GITHUB_WORKSPACE
+          mkdir -p Alisa.xcworkspace
+          cat > Alisa.xcworkspace/contents.xcworkspacedata << 'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace version="1.0">
+   <FileRef location="group:Alisa.xcodeproj"/>
+</Workspace>
+EOF
+
       - name: Build (Archive)
         run: |
           cd $GITHUB_WORKSPACE
-          ls -la *.xcodeproj *.xcworkspace 2>/dev/null || echo "No project files found"
-          if [ -d "Alisa.xcworkspace" ]; then
-            xcodebuild archive \
-              -workspace Alisa.xcworkspace \
-              -scheme Alisa \
-              -archivePath build/Alisa.xcarchive \
-              -configuration ${{ github.event.inputs.configuration || 'Debug' }} \
-              -destination 'generic/platform=iOS' \
-              CODE_SIGN_IDENTITY="" \
-              CODE_SIGNING_REQUIRED=NO \
-              CODE_SIGNING_ALLOWED=NO
-          else
-            xcodebuild archive \
-              -project Alisa.xcodeproj \
-              -scheme Alisa \
-              -archivePath build/Alisa.xcarchive \
-              -configuration ${{ github.event.inputs.configuration || 'Debug' }} \
-              -destination 'generic/platform=iOS' \
-              CODE_SIGN_IDENTITY="" \
-              CODE_SIGNING_REQUIRED=NO \
-              CODE_SIGNING_ALLOWED=NO
-          fi
+          xcodebuild archive \
+            -workspace Alisa.xcworkspace \
+            -scheme Alisa \
+            -archivePath build/Alisa.xcarchive \
+            -configuration ${{ github.event.inputs.configuration || 'Debug' }} \
+            -destination 'generic/platform=iOS' \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
 
       - name: Create IPA
         run: |
