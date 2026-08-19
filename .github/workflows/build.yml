@@ -51,13 +51,41 @@ jobs:
       - name: Build (Archive)
         run: |
           cd $GITHUB_WORKSPACE
+
+          # Create workspace with proper package reference
+          mkdir -p Alisa.xcworkspace/xcshareddata
+          cat > Alisa.xcworkspace/contents.xcworkspacedata << 'XEOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace version="1.0">
+   <FileRef location="group:Alisa.xcodeproj"/>
+   <FileRef location="group:./"/>
+</Workspace>
+XEOF
+
+          # Create xcshareddata scheme
+          mkdir -p Alisa.xcodeproj/xcshareddata/xcschemes
+          cat > Alisa.xcodeproj/xcshareddata/xcschemes/Alisa.xcscheme << 'XEOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<Scheme version="1.0">
+   <BuildAction parallelizeBuildables="YES" buildImplicitDependencies="YES">
+      <BuildActionEntries>
+         <BuildActionEntry buildForTesting="YES" buildForRunning="YES" buildForProfiling="YES" buildForArchiving="YES" buildForAnalyzing="YES">
+            <BuildableReference BuildableIdentifier="primary" BlueprintIdentifier="Alisa" BuildableName="Alisa.app" BlueprintName="Alisa" ReferencedContainer="container:Alisa.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+      </BuildActionEntries>
+   </BuildAction>
+   <ArchiveAction buildConfiguration="Debug" revealArchiveInOrganizer="YES">
+   </ArchiveAction>
+</Scheme>
+XEOF
+
           xcodebuild archive \
-            -project Alisa.xcodeproj \
+            -workspace Alisa.xcworkspace \
             -scheme Alisa \
             -archivePath build/Alisa.xcarchive \
             -configuration ${{ github.event.inputs.configuration || 'Debug' }} \
             -destination 'generic/platform=iOS' \
-            -clonedSourcePackagesDirPath .build \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO
