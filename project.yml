@@ -61,7 +61,8 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.alisa.gcd
         SKIP_INSTALL: YES
         CLANG_ENABLE_OBJC_ARC: YES
-        HEADER_SEARCH_PATHS: "$(inherited) $(PROJECT_DIR)/.deps/GCDWebServer/GCDWebServer/Core"
+        GCC_PRECOMPILE_PREFIX_HEADER: YES
+        OTHER_CFLAGS: "$(inherited) -I$(PROJECT_DIR)/.deps/GCDWebServer/GCDWebServer/Core"
 
   Highlightr:
     type: framework
