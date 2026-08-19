@@ -41,6 +41,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.alisa.grdb
         SKIP_INSTALL: YES
+        SWIFT_STRICT_CONCURRENCY: minimal
 
   ZIPFoundation:
     type: framework
@@ -51,6 +52,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.alisa.zip
         SKIP_INSTALL: YES
+        SWIFT_STRICT_CONCURRENCY: minimal
 
   AlisaCore:
     type: framework
@@ -64,3 +66,4 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.alisa.core
         SKIP_INSTALL: YES
+        SWIFT_STRICT_CONCURRENCY: minimal
