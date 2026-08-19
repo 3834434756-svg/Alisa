@@ -42,13 +42,14 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE
           rm -rf Alisa.xcodeproj Alisa.xcworkspace
-          xcodegen generate --use-xcworkspace
+          xcodegen generate
 
       - name: Build (Archive)
         run: |
           cd $GITHUB_WORKSPACE
-          WORKSPACE="Alisa.xcworkspace"
-          if [ ! -d "$WORKSPACE" ]; then
+          if [ -d "Alisa.xcworkspace" ]; then
+            WORKSPACE="Alisa.xcworkspace"
+          else
             WORKSPACE="Alisa.xcodeproj"
           fi
           xcodebuild archive \
