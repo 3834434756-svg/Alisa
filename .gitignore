@@ -1,0 +1,37 @@
+# Xcode
+*.xcworkspace
+*.xcuserdata
+DerivedData/
+build/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Swift Package Manager
+.build/
+Package.resolved
+
+# XcodeGen
+Alisa.xcodeproj/project.xcworkspace
+Alisa.xcodeproj/xcuserdata
+
+# CocoaPods
+Pods/
+Podfile.lock
+
+# Fastlane
+fastlane/report.xml
+fastlane/test_output
+
+# Environment
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Backup
+Alisa-Backup-*.zip

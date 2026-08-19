@@ -1,0 +1,130 @@
+name: Build Alisa IPA
+
+on:
+  workflow_dispatch:
+    inputs:
+      configuration:
+        description: '构建配置'
+        required: true
+        default: 'Debug'
+        type: choice
+        options:
+          - Debug
+          - Release
+      signing:
+        description: '签名方式'
+        required: true
+        default: 'unsigned'
+        type: choice
+        options:
+          - unsigned
+          - development
+          - distribution
+  push:
+    tags:
+      - 'v*'
+
+env:
+  PROJECT_NAME: Alisa
+  SCHEME: Alisa
+  DEVELOPER_DIR: /Applications/Xcode.app/Contents/Developer
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Select Xcode
+        run: |
+          sudo xcode-select -s /Applications/Xcode.app
+          xcodebuild -version
+          swift --version
+
+      - name: Install XcodeGen
+        run: |
+          brew install xcodegen
+          cd /workspace/Alisa
+          make xcodegen
+
+      - name: Resolve SPM Dependencies
+        run: |
+          cd /workspace/Alisa
+          xcodebuild -resolvePackageDependencies \
+            -project Alisa.xcodeproj \
+            -scheme $SCHEME \
+            -clonedSourcePackagesDirPath ~/Library/Developer/Xcode/DerivedData/SourcePackages
+
+      - name: Build
+        run: |
+          cd /workspace/Alisa
+          BUILD_FLAGS=""
+          if [ "${{ github.event.inputs.signing }}" = "unsigned" ]; then
+            BUILD_FLAGS='CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO'
+          fi
+
+          xcodebuild archive \
+            -project Alisa.xcodeproj \
+            -scheme $SCHEME \
+            -archivePath build/$PROJECT_NAME.xcarchive \
+            -configuration ${{ github.event.inputs.configuration || 'Debug' }} \
+            -destination 'generic/platform=iOS' \
+            $BUILD_FLAGS
+
+      - name: Create IPA
+        run: |
+          cd /workspace/Alisa
+          if [ "${{ github.event.inputs.signing }}" = "unsigned" ]; then
+            mkdir -p build/Payload
+            cp -r build/$PROJECT_NAME.xcarchive/Products/Applications/$PROJECT_NAME.app build/Payload/
+            cd build && zip -r $PROJECT_NAME-unsigned.ipa Payload
+            rm -rf Payload
+            echo "IPA_PATH=build/$PROJECT_NAME-unsigned.ipa" >> $GITHUB_ENV
+          else
+            EXPORT_OPTIONS="exportOptions.plist"
+            if [ "${{ github.event.inputs.signing }}" = "development" ]; then
+              echo '<?xml version="1.0" encoding="UTF-8"?>
+              <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+              <plist version="1.0"><dict><key>method</key><string>development</string><key>signingStyle</key><string>automatic</string></dict></plist>' > build/export-dev.plist
+              EXPORT_OPTIONS="build/export-dev.plist"
+            fi
+            xcodebuild -exportArchive \
+              -archivePath build/$PROJECT_NAME.xcarchive \
+              -exportPath build/ \
+              -exportOptionsPlist $EXPORT_OPTIONS
+            echo "IPA_PATH=build/$PROJECT_NAME.ipa" >> $GITHUB_ENV
+          fi
+
+      - name: Generate Version Info
+        id: version
+        run: |
+          SHORT_HASH=$(git rev-parse --short HEAD)
+          BUILD_NUM=$(date +%s)
+          VERSION="1.0.0"
+          if [ -f Info.plist ]; then
+            VERSION=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" Info.plist 2>/dev/null || echo "1.0.0")
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "build=$BUILD_NUM" >> $GITHUB_OUTPUT
+          echo "hash=$SHORT_HASH" >> $GITHUB_OUTPUT
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Alisa_${{ steps.version.outputs.version }}_${{ steps.version.outputs.build }}_${{ github.event.inputs.configuration || 'Debug' }}_${{ steps.version.outputs.hash }}
+          path: ${{ env.IPA_PATH }}
+          compression-level: 0
+          if-no-files-found: error
+
+      - name: Upload dSYM
+        uses: actions/upload-artifact@v4
+        with:
+          name: Alisa-dSYM-${{ steps.version.outputs.hash }}
+          path: build/Alisa.xcarchive/dSYMs/
+          compression-level: 9
+          if-no-files-found: ignore

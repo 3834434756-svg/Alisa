@@ -1,0 +1,57 @@
+fastlane_version "2.220.0"
+
+default_platform :ios
+
+platform :ios do
+  desc "构建 Debug 未签名 IPA（侧载用）"
+  lane :build_unsigned do
+    xcodegen
+    xcodebuild(
+      scheme: "Alisa",
+      configuration: "Debug",
+      destination: "generic/platform=iOS",
+      archive: true,
+      archive_path: "build/Alisa.xcarchive",
+      code_signing_identity: "",
+      code_signing_required: false
+    )
+    sh("mkdir -p build/Payload")
+    sh("cp -r build/Alisa.xcarchive/Products/Applications/Alisa.app build/Payload/")
+    sh("cd build && zip -r Alisa-unsigned.ipa Payload")
+    sh("rm -rf build/Payload")
+  end
+
+  desc "构建 Release 并导出 IPA"
+  lane :build_release do
+    xcodegen
+    gym(
+      scheme: "Alisa",
+      configuration: "Release",
+      export_method: "development",
+      output_directory: "build",
+      output_name: "Alisa.ipa"
+    )
+  end
+
+  desc "上传到 TestFlight"
+  lane :testflight do
+    build_release
+    pilot(
+      app_identifier: "com.alisa.app",
+      ipa: "build/Alisa.ipa",
+      skip_waiting_for_build_processing: true
+    )
+  end
+
+  desc "上传到 App Store"
+  lane :appstore do
+    build_release
+    deliver(
+      app_identifier: "com.alisa.app",
+      ipa: "build/Alisa.ipa",
+      force: true,
+      skip_metadata: false,
+      skip_screenshots: true
+    )
+  end
+end
