@@ -49,8 +49,18 @@ jobs:
       - name: Install XcodeGen
         run: |
           brew install xcodegen
+
+      - name: Generate Xcode Project
+        run: |
           cd $GITHUB_WORKSPACE
-          make xcodegen
+          xcodegen generate
+
+      - name: Resolve Package Dependencies
+        run: |
+          cd $GITHUB_WORKSPACE
+          xcodebuild -resolvePackageDependencies \
+            -project Alisa.xcodeproj \
+            -scheme Alisa
 
       - name: Build
         run: |
@@ -62,7 +72,7 @@ jobs:
 
           xcodebuild archive \
             -project Alisa.xcodeproj \
-            -scheme $SCHEME \
+            -scheme Alisa \
             -archivePath build/$PROJECT_NAME.xcarchive \
             -configuration ${{ github.event.inputs.configuration || 'Debug' }} \
             -destination 'generic/platform=iOS' \
@@ -78,17 +88,10 @@ jobs:
             rm -rf Payload
             echo "IPA_PATH=build/$PROJECT_NAME-unsigned.ipa" >> $GITHUB_ENV
           else
-            EXPORT_OPTIONS="exportOptions.plist"
-            if [ "${{ github.event.inputs.signing }}" = "development" ]; then
-              echo '<?xml version="1.0" encoding="UTF-8"?>
-              <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-              <plist version="1.0"><dict><key>method</key><string>development</string><key>signingStyle</key><string>automatic</string></dict></plist>' > build/export-dev.plist
-              EXPORT_OPTIONS="build/export-dev.plist"
-            fi
             xcodebuild -exportArchive \
               -archivePath build/$PROJECT_NAME.xcarchive \
               -exportPath build/ \
-              -exportOptionsPlist $EXPORT_OPTIONS
+              -exportOptionsPlist exportOptions.plist
             echo "IPA_PATH=build/$PROJECT_NAME.ipa" >> $GITHUB_ENV
           fi
 
