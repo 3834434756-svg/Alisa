@@ -48,12 +48,10 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE
           mkdir -p Alisa.xcworkspace
-          cat > Alisa.xcworkspace/contents.xcworkspacedata << 'EOF'
-<?xml version="1.0" encoding="UTF-8"?>
-<Workspace version="1.0">
-   <FileRef location="group:Alisa.xcodeproj"/>
-</Workspace>
-EOF
+          echo '<?xml version="1.0" encoding="UTF-8"?>' > Alisa.xcworkspace/contents.xcworkspacedata
+          echo '<Workspace version="1.0">' >> Alisa.xcworkspace/contents.xcworkspacedata
+          echo '   <FileRef location="group:Alisa.xcodeproj"/>' >> Alisa.xcworkspace/contents.xcworkspacedata
+          echo '</Workspace>' >> Alisa.xcworkspace/contents.xcworkspacedata
 
       - name: Build (Archive)
         run: |
