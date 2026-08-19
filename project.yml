@@ -60,7 +60,10 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.alisa.gcd
         SKIP_INSTALL: YES
-        HEADER_SEARCH_PATHS: $(SRCROOT)/.deps/GCDWebServer/GCDWebServer/Core
+        CLANG_ENABLE_OBJC_ARC: YES
+        HEADER_SEARCH_PATHS: "$(SRCROOT)/.deps/GCDWebServer/GCDWebServer/Core"
+        USER_HEADER_SEARCH_PATHS: "$(SRCROOT)/.deps/GCDWebServer/GCDWebServer/Core"
+        ALWAYS_SEARCH_USER_PATHS: YES
 
   Highlightr:
     type: framework
