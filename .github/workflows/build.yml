@@ -49,7 +49,10 @@ jobs:
       - name: Pre-resolve SPM
         run: |
           cd $GITHUB_WORKSPACE
-          swift package resolve
+          export SWIFT_PACKAGE_DIR="$GITHUB_WORKSPACE"
+          xcodebuild -resolvePackageDependencies \
+            -project Alisa.xcodeproj \
+            -scheme Alisa
 
       - name: Build (Archive)
         run: |
