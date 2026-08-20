@@ -2,6 +2,7 @@ import Foundation
 
 // MARK: - AI Client
 
+@MainActor
 final class AIClient {
     static let shared = AIClient()
 
@@ -446,10 +447,3 @@ enum AIClientError: LocalizedError {
     }
 }
 
-// Re-export for convenience
-typealias ParsedResponse = (
-    content: String,
-    toolCalls: [ToolCall],
-    finishReason: String,
-    usage: TokenUsage?
-)

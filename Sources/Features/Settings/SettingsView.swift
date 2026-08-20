@@ -2,240 +2,29 @@ import SwiftUI
 
 // MARK: - Settings View
 
+enum SettingsTab: String, CaseIterable {
+    case api = "API 配置"
+    case parameters = "AI 参数"
+    case roles = "角色管理"
+    case backup = "备份与恢复"
+    case about = "关于"
+
+    var systemImage: String {
+        switch self {
+        case .api: return "antenna.radiowaves.left.and.right"
+        case .parameters: return "slider.horizontal.3"
+        case .roles: return "person.circle"
+        case .backup: return "externaldrive"
+        case .about: return "info.circle"
+        }
+    }
+}
+
 struct SettingsView: View {
     @EnvironmentObject var configManager: ConfigManager
     @EnvironmentObject var roleManager: RoleManager
     @EnvironmentObject var parameterManager: ParameterManager
     @State private var selectedTab: SettingsTab = .api
-
-    enum SettingsTab: String, CaseIterable {
-        case api = "API 配置"
-        case parameters = "AI 参数"
-        case roles = "角色管理"
-        case backup = "备份与恢复"
-        case about = "关于"
-
-        var systemImage: String {
-            switch self {
-            case .api: return "antenna.radiowaves.left.and.right"
-            case .parameters: return "slider.horizontal.3"
-            case .roles: return "person.circle"
-            case .backup: return "externaldrive"
-            case .about: return "info.circle"
-            }
-        }
-    }
-
-    var body: some View {
-        NavigationStack {
-            if UIDevice.current.userInterfaceIdiom == .pad {
-                SettingsSplitView(selectedTab: $selectedTab)
-            } else {
-                SettingsList()
-            }
-        }
-    }
-
-    @ViewBuilder
-    private func SettingsList() -> some View {
-        List {
-            ForEach(SettingsTab.allCases, id: \.self) { tab in
-                NavigationLink {
-                    settingsContent(for: tab)
-                } label: {
-                    Label(tab.rawValue, systemImage: tab.systemImage)
-                }
-            }
-        }
-        .navigationTitle("设置")
-    }
-
-    @ViewBuilder
-    private func settingsContent(for tab: SettingsTab) -> some View {
-        switch tab {
-        case .api: APIConfigView()
-        case .parameters: AIParametersView()
-        case .roles: RoleManagementView()
-        case .backup: BackupView()
-        case .about: AboutView()
-        }
-    }
-}
-
-struct SettingsSplitView: View {
-    @Binding var selectedTab: SettingsTab
-
-    var body: some View {
-        HSplitView {
-            List(selection: $selectedTab) {
-                ForEach(SettingsTab.allCases, id: \.self) { tab in
-                    Label(tab.rawValue, systemImage: tab.systemImage)
-                        .tag(tab)
-                }
-            }
-            .listStyle(.sidebar)
-            .frame(minWidth: 200, idealWidth: 250)
-
-            settingsDetail(for: selectedTab)
-        }
-        .navigationTitle("设置")
-    }
-
-    @ViewBuilder
-    private func settingsDetail(for tab: SettingsTab) -> some View {
-        switch tab {
-        case .api: APIConfigView()
-        case .parameters: AIParametersView()
-        case .roles: RoleManagementView()
-        case .backup: BackupView()
-        case .about: AboutView()
-        }
-    }
-}
-
-// MARK: - API Config View
-
-struct APIConfigView: View {
-    @EnvironmentObject var configManager: ConfigManager
-    @State private var showingAddConfig = false
-    @State private var editingConfig: APIConfig?
-    @State private var testResult: (UUID, Bool)?
-
-    var body: some View {
-        Form {
-            Section("当前配置") {
-                if let active = configManager.activeConfig {
-                    ActiveConfigCard(config: active)
-                } else {
-                    Text("未配置 API 连接")
-                        .foregroundStyle(.secondary)
-                }
-            }
-
-            Section("配置列表") {
-                ForEach(configManager.configs) { config in
-                    ConfigRow(
-                        config: config,
-                        isActive: config.id == configManager.activeConfig?.id,
-                        testResult: testResult?.0 == config.id ? testResult?.1 : nil,
-                        onActivate: {
-                            Task { try? await configManager.setActive(config.id) }
-                        },
-                        onTest: {
-                            Task {
-                                testResult = (config.id, await configManager.testConnection(config))
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                                    testResult = nil
-                                }
-                            }
-                        },
-                        onEdit: { editingConfig = config },
-                        onDelete: {
-                            Task { try? await configManager.deleteConfig(id: config.id) }
-                        }
-                    )
-                }
-
-                Button {
-                    showingAddConfig = true
-                } label: {
-                    Label("添加配置", systemImage: "plus")
-                }
-            }
-        }
-        .formStyle(.grouped)
-        .navigationTitle("API 配置")
-        .sheet(isPresented: $showingAddConfig) {
-            APIConfigSheet(config: nil)
-        }
-        .sheet(item: $editingConfig) { config in
-            APIConfigSheet(config: config)
-        }
-    }
-}
-
-struct ActiveConfigCard: View {
-    let config: APIConfig
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Circle()
-                    .fill(.green)
-                    .frame(width: 8, height: 8)
-                Text(config.name).font(.headline)
-            }
-            Text(config.baseURL).font(.caption).foregroundStyle(.secondary)
-            Text("模型: \(config.model)").font(.caption).foregroundStyle(.secondary)
-        }
-        .padding(.vertical, 4)
-    }
-}
-
-struct ConfigRow: View {
-    let config: APIConfig
-    let isActive: Bool
-    let testResult: Bool?
-    let onActivate: () -> Void
-    let onTest: () -> Void
-    let onEdit: () -> Void
-    let onDelete: () -> Void
-
-    var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    Text(config.name).font(.headline)
-                    if isActive {
-                        Text("当前")
-                            .font(.caption)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(.green.opacity(0.1))
-                            .clipShape(Capsule())
-                    }
-                }
-                Text(config.baseURL).font(.caption).foregroundStyle(.secondary)
-                Text(config.model).font(.caption).foregroundStyle(.secondary)
-            }
-
-            Spacer()
-
-            if let result = testResult {
-                Image(systemName: result ? "checkmark.circle.fill" : "xmark.circle.fill")
-                    .foregroundStyle(result ? .green : .red)
-            }
-
-            Menu {
-                if !isActive {
-                    Button("激活", systemImage: "checkmark") { onActivate() }
-                }
-                Button("测试连接", systemImage: "bolt") { onTest() }
-                Button("编辑", systemImage: "pencil") { onEdit() }
-                Divider()
-                Button("删除", systemImage: "trash", role: .destructive) { onDelete() }
-            } label: {
-                Image(systemName: "ellipsis")
-                    .font(.title3)
-            }
-            .buttonStyle(.plain)
-        }
-        .padding(.vertical, 4)
-    }
-}
-
-// MARK: - API Config Sheet
-
-struct APIConfigSheet: View {
-    let config: APIConfig?
-    @EnvironmentObject var configManager: ConfigManager
-    @Environment(\.dismiss) var dismiss
-    @State private var name = ""
-    @State private var baseURL = ""
-    @State private var apiKey = ""
-    @State private var model = ""
-    @State private var showingError = false
-    @State private var errorMessage = ""
 
     var body: some View {
         NavigationStack {
@@ -734,7 +523,3 @@ extension CodeBlock {
     }
 }
 
-extension APIConfig: Identifiable {}
-extension Role: Identifiable {}
-extension Session: Identifiable {}
-extension Message: Identifiable {}

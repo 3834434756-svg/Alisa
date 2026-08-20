@@ -102,7 +102,6 @@ actor ToolExecutor {
 
     static let availableTools: [ToolDefinition] = [
         ToolDefinition(
-            type: "function",
             function: FunctionDefinition(
                 name: "read_file",
                 description: "读取项目中的文件内容",
@@ -112,7 +111,6 @@ actor ToolExecutor {
             )
         ),
         ToolDefinition(
-            type: "function",
             function: FunctionDefinition(
                 name: "write_file",
                 description: "创建或覆盖写入文件",
@@ -123,7 +121,6 @@ actor ToolExecutor {
             )
         ),
         ToolDefinition(
-            type: "function",
             function: FunctionDefinition(
                 name: "edit_file",
                 description: "对文件进行精确编辑（搜索替换）",
@@ -135,7 +132,6 @@ actor ToolExecutor {
             )
         ),
         ToolDefinition(
-            type: "function",
             function: FunctionDefinition(
                 name: "list_files",
                 description: "列出目录下的文件",
@@ -145,7 +141,6 @@ actor ToolExecutor {
             )
         ),
         ToolDefinition(
-            type: "function",
             function: FunctionDefinition(
                 name: "run_command",
                 description: "在项目目录下执行允许的 shell 命令",

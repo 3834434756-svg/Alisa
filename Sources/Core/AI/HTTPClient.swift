@@ -1,5 +1,6 @@
 import Foundation
 
+@MainActor
 final class HTTPClient {
     static let shared = HTTPClient()
 
@@ -93,7 +94,7 @@ final class HTTPClient {
     }
 }
 
-private class StreamingTask: NSObject, URLSessionDataDelegate {
+private class StreamingTask: NSObject, URLSessionDataDelegate, @unchecked Sendable {
     let session: URLSession
     let request: URLRequest
     let onEvent: (Data) -> Void
