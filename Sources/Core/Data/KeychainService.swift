@@ -7,6 +7,8 @@ actor KeychainService {
     private let service = "com.alisa.apikeys"
     private let accessGroup: String? = nil
 
+    var serviceName: String { service }
+
     private init() {}
 
     // MARK: - Public Interface

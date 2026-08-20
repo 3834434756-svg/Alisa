@@ -192,7 +192,9 @@ struct ChatCompletionRequest: Encodable {
 struct ChatMessage: Encodable {
     let role: String
     let content: String
-let toolCalls: [ToolCallRequest]?
+    let toolCalls: [ToolCallRequest]?
+    let toolCallID: String?
+    let name: String?
 
     init(role: String, content: String, toolCalls: [ToolCallRequest]? = nil, toolCallID: String? = nil, name: String? = nil) {
         self.role = role
@@ -255,9 +257,19 @@ enum ToolChoice: Encodable {
         case .none: try container.encode("none")
         case .required: try container.encode("required")
         case .specific(let name):
-            let dict = ["type": "function", "function": ["name": name]]
-            try container.encode(dict)
+            var keyed = encoder.container(keyedBy: CodingKeys.self)
+            try keyed.encode("function", forKey: .type)
+            var nested = keyed.nestedContainer(keyedBy: FunctionCodingKeys.self, forKey: .function)
+            try nested.encode(name, forKey: .name)
         }
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case type, function
+    }
+
+    enum FunctionCodingKeys: String, CodingKey {
+        case name
     }
 }
 

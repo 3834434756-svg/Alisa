@@ -27,8 +27,8 @@ final class ConfigManager: ObservableObject {
     }
 
     func addConfig(name: String, baseURL: String, apiKey: String, model: String, customHeaders: [String: String]? = nil) async throws -> APIConfig {
-        let keychainRef = "\(keychain.service).\(UUID().uuidString)"
-        try keychain.saveAPIKey(apiKey, for: UUID(uuidString: keychainRef.components(separatedBy: ".").last!)!)
+        let keychainRef = "\(keychain.serviceName).\(UUID().uuidString)"
+        try await keychain.saveAPIKey(apiKey, for: UUID(uuidString: keychainRef.components(separatedBy: ".").last!)!)
 
         var config = APIConfig(
             name: name,
@@ -59,7 +59,7 @@ final class ConfigManager: ObservableObject {
     }
 
     func deleteConfig(id: UUID) async throws {
-        try keychain.deleteAPIKey(for: id)
+        try await keychain.deleteAPIKey(for: id)
         try await repository.delete(id: id)
         configs.removeAll { $0.id == id }
         if activeConfig?.id == id {
@@ -80,7 +80,7 @@ final class ConfigManager: ObservableObject {
 
     func testConnection(_ config: APIConfig) async -> Bool {
         do {
-            let apiKey = try keychain.getAPIKey(for: config.id) ?? ""
+            let apiKey = try await keychain.getAPIKey(for: config.id) ?? ""
             let headers = ["Authorization": "Bearer \(apiKey)", "Content-Type": "application/json"]
             let request = ChatCompletionRequest(
                 model: config.model,
