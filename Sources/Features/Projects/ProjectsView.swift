@@ -308,13 +308,13 @@ struct ImportProjectSheet: View {
                     .disabled(projectName.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
             }
-            .fileImporter(
+.fileImporter(
                 isPresented: $showingPicker,
                 allowedContentTypes: [.zip]
             ) { result in
                 switch result {
                 case .success(let urls):
-                    let urlArray = urls as? [URL] ?? [urls as! URL]
+                    let urlArray: [URL] = (urls as? [URL]) ?? [(urls as! URL)]
                     guard let url = urlArray.first else { return }
                     Task {
                         do {
@@ -324,6 +324,12 @@ struct ImportProjectSheet: View {
                             errorMessage = error.localizedDescription
                             showingError = true
                         }
+                    }
+                case .failure(let error):
+                    errorMessage = error.localizedDescription
+                    showingError = true
+                }
+            }
                     }
                 case .failure(let error):
                     errorMessage = error.localizedDescription

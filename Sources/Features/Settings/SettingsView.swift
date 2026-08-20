@@ -370,10 +370,11 @@ struct AIParametersView: View {
                         Text("Max Tokens: \(parameterManager.parameters.maxTokens)")
                         Spacer()
                     }
-                    Slider(value: Binding(
-                        get: { Double(parameterManager.parameters.maxTokens) },
-                        set: { parameterManager.parameters.maxTokens = Int($0) }
-                    ), in: 1024...32768, step: 1024)
+                    Slider(
+                        value: Binding(
+                            get: { Double(parameterManager.parameters.maxTokens) },
+                            set: { parameterManager.parameters.maxTokens = Int($0) }
+                        ), in: 1024...32768, step: 1024)
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
@@ -385,9 +386,7 @@ struct AIParametersView: View {
                         value: Binding(
                             get: { parameterManager.parameters.temperature },
                             set: { parameterManager.parameters.temperature = $0 }
-                        ),
-                        in: 0...2, step: 0.05
-                    )
+                        ), in: 0...2, step: 0.05)
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
@@ -399,14 +398,13 @@ struct AIParametersView: View {
                         value: Binding(
                             get: { parameterManager.parameters.topP },
                             set: { parameterManager.parameters.topP = $0 }
-                        ),
-                        in: 0...1, step: 0.05
-                    )
+                        ), in: 0...1, step: 0.05)
                 }
             }
+
+            .formStyle(.grouped)
+            .navigationTitle("AI 参数")
         }
-        .formStyle(.grouped)
-        .navigationTitle("AI 参数")
     }
 
     private func thinkingDurationDescription(for duration: ThinkingDuration) -> String {
@@ -484,7 +482,6 @@ struct RoleManagementView: View {
                         if let data = data {
                             let url = FileManager.default.temporaryDirectory.appendingPathComponent("alisa-roles-export.json")
                             try? data.write(to: url)
-                            // Share sheet would be presented here
                         }
                     }
                 }
@@ -498,7 +495,7 @@ struct RoleManagementView: View {
         .fileImporter(isPresented: $showingImportExport, allowedContentTypes: [.json]) { result in
             switch result {
             case .success(let urls):
-                let urlArray = urls as? [URL] ?? [urls as! URL]
+                let urlArray: [URL] = (urls as? [URL]) ?? [(urls as! URL)]
                 if let url = urlArray.first {
                     Task {
                         let data = try? Data(contentsOf: url)
@@ -571,10 +568,8 @@ struct RoleEditSheet: View {
                     Button("取消") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("保存") {
-                        saveRole()
-                    }
-                    .disabled(name.isEmpty || systemPrompt.isEmpty)
+                    Button("保存") { saveRole() }
+                        .disabled(name.isEmpty || systemPrompt.isEmpty)
                 }
             }
             .onAppear {
@@ -585,7 +580,6 @@ struct RoleEditSheet: View {
                 }
             }
         }
-    }
 
     private func saveRole() {
         let specialties = specialtiesText.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
@@ -666,9 +660,9 @@ struct BackupView: View {
                     isCreatingBackup = false
                     password = ""
                 }
+            } message: {
+                Text("可选：设置密码加密备份文件")
             }
-        } message: {
-            Text("可选：设置密码加密备份文件")
         }
     }
 }
@@ -706,7 +700,7 @@ struct AboutView: View {
             Section("技术栈") {
                 LabeledContent("语言", value: "Swift 6")
                 LabeledContent("UI 框架", value: "SwiftUI + UIKit")
-                LabeledContent("数据库", value: "GRDB (SQLite)")
+                LabeledContent("数据库", value: "JSON 文件存储")
                 LabeledContent("最低系统", value: "iOS 17.0")
             }
 
@@ -721,23 +715,22 @@ struct AboutView: View {
     }
 }
 
-// MARK: - Extensions
+struct FeatureRow: View {
+    let icon: String
+    let title: String
+    let description: String
 
-extension CodeBlock {
-    static func extract(from text: String) -> [CodeBlock] {
-        var blocks: [CodeBlock] = []
-        let pattern = "```(\\w+)?\\n([\\s\\S]*?)```"
-        guard let regex = try? NSRegularExpression(pattern: pattern) else { return [] }
-        let matches = regex.matches(in: text, range: NSRange(text.startIndex..., in: text))
+    var body: some View {
+        HStack(spacing: 16) {
+            Image(systemName: icon)
+                .font(.title2)
+                .foregroundStyle(.blue)
+                .frame(width: 40)
 
-        for match in matches {
-            let language = match.range(at: 1).location != NSNotFound
-                ? String(text[Range(match.range(at: 1), in: text)!])
-                : "text"
-            let code = String(text[Range(match.range(at: 2), in: text)!])
-            blocks.append(CodeBlock(language: language, code: code))
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title).font(.headline)
+                Text(description).font(.subheadline).foregroundStyle(.secondary)
+            }
         }
-        return blocks
     }
 }
-
