@@ -41,7 +41,6 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.alisa.grdb
-        SKIP_INSTALL: YES
 
   ZIPFoundation:
     type: framework
@@ -51,7 +50,6 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.alisa.zip
-        SKIP_INSTALL: YES
 
   AlisaCore:
     type: framework
