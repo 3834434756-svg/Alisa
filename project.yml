@@ -50,6 +50,7 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.alisa.zip
+        SWIFT_VERSION: "5"
 
   AlisaCore:
     type: framework
