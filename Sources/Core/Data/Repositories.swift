@@ -1,5 +1,4 @@
 import Foundation
-@preconcurrency import GRDB
 
 // MARK: - Config Repository
 

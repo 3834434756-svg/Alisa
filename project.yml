@@ -18,12 +18,10 @@ targets:
     type: application
     platform: iOS
     sources:
-      - path: Sources/App
-      - path: Sources/UI
-      - path: Sources/Features
+      - path: Sources
+      - path: .deps/GRDB/Sources/GRDBSQLite
+      - path: .deps/ZIPFoundation/Sources/ZIPFoundation
       - path: Info.plist
-    dependencies:
-      - target: AlisaCore
     settings:
       base:
         INFOPLIST_FILE: Info.plist
@@ -31,34 +29,3 @@ targets:
         PRODUCT_NAME: Alisa
         DEVELOPMENT_TEAM: ""
         CODE_SIGN_STYLE: Automatic
-
-  GRDB:
-    type: framework
-    platform: iOS
-    sources:
-      - path: .deps/GRDB/Sources/GRDBSQLite
-    settings:
-      base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.alisa.grdb
-
-  ZIPFoundation:
-    type: framework
-    platform: iOS
-    sources:
-      - path: .deps/ZIPFoundation/Sources/ZIPFoundation
-    settings:
-      base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.alisa.zip
-
-  AlisaCore:
-    type: framework
-    platform: iOS
-    sources:
-      - path: Sources/Core
-    dependencies:
-      - target: GRDB
-      - target: ZIPFoundation
-    settings:
-      base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.alisa.core
-        SKIP_INSTALL: YES
