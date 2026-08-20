@@ -8,7 +8,7 @@ actor BackupManager {
 
     private init() {}
 
-    func createBackup(projectIDs: [UUID]? = nil, password: String? = nil, progress: @escaping (Double) -> Void) async throws -> URL {
+    func createBackup(projectIDs: [UUID]? = nil, password: String? = nil) async throws -> URL {
         let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent("AlisaBackup-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: tempDir) }
@@ -22,7 +22,6 @@ actor BackupManager {
         let backupData = try await createBackupData(projectIDs: projectIDs)
         try backupData.write(to: backupURL)
 
-        progress(1.0)
         return backupURL
     }
 

@@ -602,7 +602,6 @@ struct RoleEditSheet: View {
 struct BackupView: View {
     @State private var isCreatingBackup = false
     @State private var isRestoringBackup = false
-    @State private var backupProgress: Double = 0
     @State private var showPasswordPrompt = false
     @State private var password = ""
 
@@ -617,7 +616,7 @@ struct BackupView: View {
                     showPasswordPrompt = true
                 } label: {
                     if isCreatingBackup {
-                        ProgressView("备份中...", value: backupProgress, total: 1.0)
+                        ProgressView("备份中...")
                     } else {
                         Label("创建备份", systemImage: "externaldrive.badge.plus")
                     }
@@ -651,12 +650,7 @@ struct BackupView: View {
                 Task {
                     isCreatingBackup = true
                     _ = try? await BackupManager.shared.createBackup(
-                        password: password.isEmpty ? nil : password,
-                        progress: { progress in
-                            Task { @MainActor in
-                                backupProgress = progress
-                            }
-                        }
+                        password: password.isEmpty ? nil : password
                     )
                     isCreatingBackup = false
                     password = ""
