@@ -199,7 +199,7 @@ enum KeychainError: LocalizedError {
 // MARK: - Keychain Key Reference Generator
 
 extension KeychainService {
-    func keychainRef(for configID: UUID) -> String {
+    nonisolated func keychainRef(for configID: UUID) -> String {
         "\(service).\(configID.uuidString)"
     }
 }
