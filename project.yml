@@ -19,8 +19,6 @@ targets:
     platform: iOS
     sources:
       - path: Sources
-      - path: .deps/GRDB/Sources/GRDBSQLite
-      - path: .deps/ZIPFoundation/Sources/ZIPFoundation
       - path: Info.plist
     settings:
       base:

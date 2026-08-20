@@ -32,21 +32,6 @@ jobs:
       - name: Install XcodeGen
         run: brew install xcodegen
 
-      - name: Download SPM dependencies as local sources
-        run: |
-          set -x
-          cd $GITHUB_WORKSPACE
-          mkdir -p .deps
-
-          rm -rf .deps/GRDB
-          git clone --depth 1 https://github.com/groue/GRDB.swift.git .deps/GRDB
-
-          rm -rf .deps/ZIPFoundation
-          git clone --depth 1 https://github.com/weichsel/ZIPFoundation.git .deps/ZIPFoundation
-
-          rm -rf .deps/GCDWebServer .deps/Highlightr
-          rm -rf .deps/GRDB/.git .deps/ZIPFoundation/.git 2>/dev/null || true
-
       - name: Generate Xcode Project
         run: |
           cd $GITHUB_WORKSPACE
