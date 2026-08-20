@@ -35,3 +35,4 @@ Thumbs.db
 
 # Backup
 Alisa-Backup-*.zip.deps/
+.deps/
