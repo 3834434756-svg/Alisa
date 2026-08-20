@@ -27,7 +27,7 @@ final class ConfigManager: ObservableObject {
     }
 
     func addConfig(name: String, baseURL: String, apiKey: String, model: String, customHeaders: [String: String]? = nil) async throws -> APIConfig {
-        let keychainRef = "\(keychain.serviceName).\(UUID().uuidString)"
+        let keychainRef = "\(await keychain.serviceName).\(UUID().uuidString)"
         try await keychain.saveAPIKey(apiKey, for: UUID(uuidString: keychainRef.components(separatedBy: ".").last!)!)
 
         var config = APIConfig(
