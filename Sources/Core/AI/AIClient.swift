@@ -176,7 +176,7 @@ final class AIClient {
                 messages.append(ChatMessage(
                     role: "assistant",
                     content: response.content,
-                    toolCalls: response.toolCalls
+                    toolCalls: response.toolCalls.map { ToolCallRequest(id: $0.id, function: FunctionCall(name: $0.name, arguments: $0.arguments)) }
                 ))
 
             } catch {

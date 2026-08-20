@@ -191,11 +191,9 @@ struct ChatCompletionRequest: Encodable {
 struct ChatMessage: Encodable {
     let role: String
     let content: String
-    let toolCalls: [ToolCall]?
-    let toolCallID: String?
-    let name: String?
+let toolCalls: [ToolCallRequest]?
 
-    init(role: String, content: String, toolCalls: [ToolCall]? = nil, toolCallID: String? = nil, name: String? = nil) {
+    init(role: String, content: String, toolCalls: [ToolCallRequest]? = nil, toolCallID: String? = nil, name: String? = nil) {
         self.role = role
         self.content = content
         self.toolCalls = toolCalls
@@ -296,7 +294,7 @@ struct ToolCallResponse: Decodable {
     let function: FunctionCall
 }
 
-struct FunctionCall: Decodable {
+struct FunctionCall: Codable {
     let name: String
     let arguments: String
 }
@@ -313,7 +311,7 @@ struct FunctionCallDelta: Decodable {
     let arguments: String?
 }
 
-struct ToolCall: Encodable {
+struct ToolCallRequest: Encodable {
     let id: String
     let type: String = "function"
     let function: FunctionCall
