@@ -310,12 +310,11 @@ struct ImportProjectSheet: View {
             }
             .fileImporter(
                 isPresented: $showingPicker,
-                allowedContentTypes: [.zip],
-                allowsMultipleSelection: false
+                allowedContentTypes: [.zip]
             ) { result in
                 switch result {
-                case .success(let urls):
-                    guard let url = urls.first else { return }
+                case .success(var urlList):
+                    guard let url = urlList.first else { return }
                     Task {
                         do {
                             _ = try await projectManager.importProject(from: url, name: projectName)

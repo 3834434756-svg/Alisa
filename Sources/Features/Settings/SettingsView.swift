@@ -67,10 +67,15 @@ struct SettingsSplitView: View {
 
     var body: some View {
         HSplitView {
-            List(selection: $selectedTab) {
+            List {
                 ForEach(SettingsTab.allCases, id: \.self) { tab in
-                    Label(tab.rawValue, systemImage: tab.systemImage)
-                        .tag(tab)
+                    Button {
+                        selectedTab = tab
+                    } label: {
+                        Label(tab.rawValue, systemImage: tab.systemImage)
+                            .foregroundStyle(selectedTab == tab ? Color.accentColor : Color.primary)
+                    }
+                    .buttonStyle(.plain)
                 }
             }
             .listStyle(.sidebar)
@@ -313,7 +318,10 @@ struct AIParametersView: View {
             }
 
             Section("思考时长") {
-                Picker("思考时长", selection: $parameterManager.parameters.thinkingDuration) {
+                Picker("思考时长", selection: Binding(
+                    get: { parameterManager.parameters.thinkingDuration },
+                    set: { parameterManager.parameters.thinkingDuration = $0 }
+                )) {
                     ForEach(ThinkingDuration.allCases, id: \.self) { duration in
                         Text(duration.displayName).tag(duration)
                     }
@@ -345,7 +353,10 @@ struct AIParametersView: View {
             }
 
             Section("推理模式") {
-                Picker("推理模式", selection: $parameterManager.parameters.reasoningMode) {
+                Picker("推理模式", selection: Binding(
+                    get: { parameterManager.parameters.reasoningMode },
+                    set: { parameterManager.parameters.reasoningMode = $0 }
+                )) {
                     ForEach(ReasoningMode.allCases, id: \.self) { mode in
                         Text(mode.displayName).tag(mode)
                     }
@@ -370,7 +381,13 @@ struct AIParametersView: View {
                         Text("Temperature: \(parameterManager.parameters.temperature, specifier: "%.2f")")
                         Spacer()
                     }
-                    Slider(value: $parameterManager.parameters.temperature, in: 0...2, step: 0.05)
+                    Slider(
+                        value: Binding(
+                            get: { parameterManager.parameters.temperature },
+                            set: { parameterManager.parameters.temperature = $0 }
+                        ),
+                        in: 0...2, step: 0.05
+                    )
                 }
 
                 VStack(alignment: .leading, spacing: 8) {
@@ -378,7 +395,13 @@ struct AIParametersView: View {
                         Text("Top P: \(parameterManager.parameters.topP, specifier: "%.2f")")
                         Spacer()
                     }
-                    Slider(value: $parameterManager.parameters.topP, in: 0...1, step: 0.05)
+                    Slider(
+                        value: Binding(
+                            get: { parameterManager.parameters.topP },
+                            set: { parameterManager.parameters.topP = $0 }
+                        ),
+                        in: 0...1, step: 0.05
+                    )
                 }
             }
 
@@ -479,13 +502,18 @@ struct RoleManagementView: View {
             RoleEditSheet(role: nil)
         }
         .fileImporter(isPresented: $showingImportExport, allowedContentTypes: [.json]) { result in
-            if case .success(let urls) = result, let url = urls.first {
-                Task {
-                    let data = try? Data(contentsOf: url)
-                    if let data = data {
-                        try? await roleManager.importRoles(from: data)
+            switch result {
+            case .success(var urlList):
+                if let url = urlList.first {
+                    Task {
+                        let data = try? Data(contentsOf: url)
+                        if let data = data {
+                            try? await roleManager.importRoles(from: data)
+                        }
                     }
                 }
+            case .failure:
+                break
             }
         }
     }

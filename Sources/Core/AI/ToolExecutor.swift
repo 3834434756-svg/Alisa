@@ -74,28 +74,8 @@ actor ToolExecutor {
     }
 
     private func runCommand(command: String, args: [String]) async throws -> String {
-        let allowedCommands = ["swift", "python3", "node", "npm", "bun", "git"]
-        guard allowedCommands.contains(command) else {
-            throw ToolExecutorError.commandNotAllowed(command)
-        }
-
-        let projectURL = await fileSystem.projectURL(for: project)
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
-        process.arguments = [command] + args
-        process.currentDirectoryURL = projectURL
-
-        let pipe = Pipe()
-        process.standardOutput = pipe
-        process.standardError = pipe
-
-        try process.run()
-        process.waitUntilExit()
-
-        let data = pipe.fileHandleForReading.readDataToEndOfFile()
-        let output = String(data: data, encoding: .utf8) ?? ""
-
-        return "命令执行完成 (exit code: \(process.terminationStatus)):\n\(output)"
+        // Process is macOS-only; not available on iOS
+        throw ToolExecutorError.commandNotAllowed("命令行执行仅支持 macOS 端")
     }
 
     // MARK: - Tool Definitions
