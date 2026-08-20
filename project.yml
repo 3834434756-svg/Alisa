@@ -10,6 +10,7 @@ options:
 settings:
   base:
     SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: minimal
     TARGETED_DEVICE_FAMILY: "1,2"
     IPHONEOS_DEPLOYMENT_TARGET: "17.0"
 
@@ -41,7 +42,6 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.alisa.grdb
         SKIP_INSTALL: YES
-        SWIFT_STRICT_CONCURRENCY: minimal
 
   ZIPFoundation:
     type: framework
@@ -52,7 +52,6 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.alisa.zip
         SKIP_INSTALL: YES
-        SWIFT_STRICT_CONCURRENCY: minimal
 
   AlisaCore:
     type: framework
@@ -66,4 +65,3 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.alisa.core
         SKIP_INSTALL: YES
-        SWIFT_STRICT_CONCURRENCY: minimal
