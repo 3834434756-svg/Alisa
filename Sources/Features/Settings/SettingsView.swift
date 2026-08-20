@@ -404,12 +404,6 @@ struct AIParametersView: View {
                     )
                 }
             }
-
-            Section("预估") {
-                let estimate = parameterManager.estimateTokens()
-                LabeledContent("预估 Token", value: "\(estimate.estimatedTokens)")
-                LabeledContent("预估时间", value: "\(estimate.estimatedTime, specifier: "%.1f") 秒")
-            }
         }
         .formStyle(.grouped)
         .navigationTitle("AI 参数")
