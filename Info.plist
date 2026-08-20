@@ -26,6 +26,8 @@
     <string>Alisa 使用 Face ID 保护您的 API Key 和项目数据</string>
     <key>NSMicrophoneUsageDescription</key>
     <string>Alisa 使用麦克风进行语音输入</string>
+    <key>NSSpeechRecognitionUsageDescription</key>
+    <string>Alisa 使用语音识别将您的语音转换为文字</string>
     <key>UIApplicationSupportsMultipleScenes</key>
     <false/>
     <key>UILaunchScreen</key>

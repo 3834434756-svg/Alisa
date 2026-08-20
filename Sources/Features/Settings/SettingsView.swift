@@ -604,6 +604,8 @@ struct BackupView: View {
     @State private var isRestoringBackup = false
     @State private var showPasswordPrompt = false
     @State private var password = ""
+    @State private var showingRestorePicker = false
+    @State private var restoreMessage: String?
 
     var body: some View {
         Form {
@@ -630,7 +632,7 @@ struct BackupView: View {
                     .foregroundStyle(.secondary)
 
                 Button {
-                    // File picker for backup
+                    showingRestorePicker = true
                 } label: {
                     if isRestoringBackup {
                         ProgressView("恢复中...")
@@ -640,9 +642,36 @@ struct BackupView: View {
                 }
                 .disabled(isCreatingBackup || isRestoringBackup)
             }
+
+            if let message = restoreMessage {
+                Section {
+                    Text(message)
+                        .font(.caption)
+                        .foregroundStyle(message.hasPrefix("✓") ? .green : .red)
+                }
+            }
         }
         .formStyle(.grouped)
         .navigationTitle("备份与恢复")
+        .fileImporter(isPresented: $showingRestorePicker, allowedContentTypes: [.json]) { result in
+            switch result {
+            case .success(let urls):
+                let urlArray: [URL] = (urls as? [URL]) ?? [(urls as! URL)]
+                guard let url = urlArray.first else { return }
+                Task {
+                    isRestoringBackup = true
+                    do {
+                        try await BackupManager.shared.restoreFromBackup(url: url)
+                        restoreMessage = "✓ 备份恢复成功"
+                    } catch {
+                        restoreMessage = "恢复失败: \(error.localizedDescription)"
+                    }
+                    isRestoringBackup = false
+                }
+            case .failure:
+                break
+            }
+        }
         .alert("设置密码", isPresented: $showPasswordPrompt) {
             SecureField("密码", text: $password)
             Button("取消", role: .cancel) { password = "" }

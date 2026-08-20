@@ -1,4 +1,5 @@
 import SwiftUI
+import Speech
 
 // MARK: - Chat View
 
@@ -264,13 +265,11 @@ struct MessageBubble: View {
                 Spacer(minLength: 60)
             }
 
-            VStack(alignment: message.role == .user ? .trailing : .leading, spacing: 8) {
-                // Role label
+            VStack(alignment: message.role == .user ? .trailing : .leading, spacing: 10) {
                 Text(message.role == .user ? "我" : message.role.rawValue.capitalized)
-                    .font(.caption.bold())
+                    .font(.subheadline.bold())
                     .foregroundStyle(.secondary)
 
-                // Content
                 if message.role == .assistant {
                     MarkdownView(text: message.content)
                 } else {
@@ -278,28 +277,26 @@ struct MessageBubble: View {
                         .font(.body)
                 }
 
-                // Code blocks
                 if let codeBlocks = message.codeBlocks {
                     ForEach(codeBlocks) { block in
                         CodeBlockView(block: block)
                     }
                 }
 
-                // Timestamp
                 Text(message.createdAt, style: .time)
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
             .background(message.role == .user ? Color.accentColor.opacity(0.1) : Color(.systemGray6))
-            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .clipShape(RoundedRectangle(cornerRadius: 16))
 
             if message.role != .user {
                 Spacer(minLength: 60)
             }
         }
-        .padding(.horizontal, 4)
+        .padding(.horizontal, 8)
     }
 }
 
@@ -399,18 +396,23 @@ struct StreamingIndicator: View {
 struct ChatInputView: View {
     @ObservedObject var viewModel: ChatViewModel
     @State private var message = ""
+    @State private var isRecording = false
+    @State private var speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: "zh-CN"))
+    @State private var recognitionTask: SFSpeechRecognitionTask?
+    @State private var audioEngine = AVAudioEngine()
 
     var body: some View {
         VStack(spacing: 0) {
             Divider()
 
-            HStack(spacing: 8) {
+            HStack(spacing: 10) {
                 Button {
                     // Attach file
                 } label: {
                     Image(systemName: "paperclip")
-                        .font(.title3)
+                        .font(.title2)
                         .foregroundStyle(.secondary)
+                        .frame(width: 36, height: 36)
                 }
                 .buttonStyle(.plain)
 
@@ -423,11 +425,16 @@ struct ChatInputView: View {
                     }
 
                 Button {
-                    // Voice input
+                    if isRecording {
+                        stopRecording()
+                    } else {
+                        startRecording()
+                    }
                 } label: {
-                    Image(systemName: "mic")
-                        .font(.title3)
-                        .foregroundStyle(.secondary)
+                    Image(systemName: isRecording ? "mic.fill" : "mic")
+                        .font(.title2)
+                        .foregroundStyle(isRecording ? .red : .secondary)
+                        .frame(width: 36, height: 36)
                 }
                 .buttonStyle(.plain)
 
@@ -435,16 +442,58 @@ struct ChatInputView: View {
                     sendMessage()
                 } label: {
                     Image(systemName: "arrow.up.circle.fill")
-                        .font(.title2)
+                        .font(.title)
                         .foregroundStyle(message.trimmingCharacters(in: .whitespaces).isEmpty ? Color.secondary : Color.accentColor)
+                        .frame(width: 36, height: 36)
                 }
                 .buttonStyle(.plain)
                 .disabled(message.trimmingCharacters(in: .whitespaces).isEmpty || viewModel.isStreaming)
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
         }
         .background(.regularMaterial)
+    }
+
+    private func startRecording() {
+        guard let recognizer = speechRecognizer, recognizer.isAvailable else { return }
+
+        recognitionTask?.cancel()
+        recognitionTask = nil
+        audioEngine = AVAudioEngine()
+
+        let request = SFSpeechAudioBufferRecognitionRequest()
+        guard let node = audioEngine.inputNode else { return }
+
+        let recordingFormat = node.outputFormat(forBus: 0)
+        node.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { buffer, _ in
+            request.append(buffer)
+        }
+
+        audioEngine.prepare()
+        do {
+            try audioEngine.start()
+        } catch {
+            return
+        }
+
+        recognitionTask = recognizer.recognitionTask(with: request) { result, error in
+            if let result = result, result.isFinal {
+                let transcription = result.bestTranscription.formattedString
+                message = (message + " " + transcription).trimmingCharacters(in: .whitespaces)
+                stopRecording()
+            }
+            if error != nil {
+                stopRecording()
+            }
+        }
+    }
+
+    private func stopRecording() {
+        audioEngine.stop()
+        audioEngine.inputNode?.removeTap(onBus: 0)
+        recognitionTask?.cancel()
+        recognitionTask = nil
     }
 
     private func sendMessage() {
@@ -672,6 +721,10 @@ final class ChatViewModel: ObservableObject {
     func sendMessage(_ text: String) {
         guard let session = currentSession else { return }
 
+        // Cancel any ongoing streaming
+        streamingTask?.cancel()
+        streamingTask = nil
+
         let userMessage = Message(sessionID: session.id, role: .user, content: text, status: .completed)
         messages.append(userMessage)
         Task {
@@ -704,6 +757,7 @@ final class ChatViewModel: ObservableObject {
                     context: context,
                     parameters: ParameterManager.shared.parameters,
                     onToken: { token in
+                        guard !Task.isCancelled else { return }
                         accumulatedContent += token
                         if let index = self.messages.lastIndex(where: { $0.status == .streaming }) {
                             self.messages[index].content = accumulatedContent
@@ -713,6 +767,7 @@ final class ChatViewModel: ObservableObject {
                         // Handle tool calls
                     },
                     onComplete: { result in
+                        guard !Task.isCancelled else { return }
                         Task { @MainActor in
                             self.isStreaming = false
                             switch result {

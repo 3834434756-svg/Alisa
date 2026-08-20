@@ -280,9 +280,9 @@ struct TabBarView: View {
                     Button {
                         selectedFileID = file.id
                     } label: {
-                        HStack(spacing: 4) {
+                        HStack(spacing: 6) {
                             Text(file.name)
-                                .font(.caption)
+                                .font(.subheadline)
                                 .lineLimit(1)
                             if file.isModified {
                                 Circle()
@@ -293,14 +293,14 @@ struct TabBarView: View {
                                 onClose(file.id)
                             } label: {
                                 Image(systemName: "xmark")
-                                    .font(.system(size: 8, weight: .bold))
+                                    .font(.system(size: 10, weight: .bold))
                                     .foregroundStyle(.secondary)
                             }
                             .buttonStyle(.plain)
                             .padding(.leading, 2)
                         }
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
                         .background(selectedFileID == file.id ? Color.accentColor.opacity(0.1) : .clear)
                         .overlay(alignment: .bottom) {
                             if selectedFileID == file.id {
@@ -316,7 +316,7 @@ struct TabBarView: View {
                 }
             }
         }
-        .frame(height: 32)
+        .frame(height: 40)
         .background(.regularMaterial)
     }
 }
