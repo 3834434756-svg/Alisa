@@ -93,6 +93,123 @@ struct SettingsSplitView: View {
     }
 }
 
+// MARK: - API Config View
+
+struct APIConfigView: View {
+    @EnvironmentObject var configManager: ConfigManager
+    @State private var showingAddConfig = false
+    @State private var editingConfig: APIConfig?
+    @State private var testResult: (UUID, Bool)?
+
+    var body: some View {
+        Form {
+            Section("当前配置") {
+                if let active = configManager.activeConfig {
+                    ActiveConfigCard(config: active)
+                } else {
+                    Text("未配置 API 连接")
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            Section("配置列表") {
+                ForEach(configManager.configs) { config in
+                    ConfigRow(
+                        config: config,
+                        isActive: config.id == configManager.activeConfig?.id,
+                        testResult: testResult?.0 == config.id ? testResult?.1 : nil,
+                        onActivate: { Task { try? await configManager.setActive(config.id) } },
+                        onTest: {
+                            Task {
+                                testResult = (config.id, await configManager.testConnection(config))
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 3) { testResult = nil }
+                            }
+                        },
+                        onEdit: { editingConfig = config },
+                        onDelete: { Task { try? await configManager.deleteConfig(id: config.id) } }
+                    )
+                }
+
+                Button { showingAddConfig = true } label: {
+                    Label("添加配置", systemImage: "plus")
+                }
+            }
+        }
+        .formStyle(.grouped)
+        .navigationTitle("API 配置")
+        .sheet(isPresented: $showingAddConfig) {
+            APIConfigSheet(config: nil)
+        }
+        .sheet(item: $editingConfig) { config in
+            APIConfigSheet(config: config)
+        }
+    }
+}
+
+struct ActiveConfigCard: View {
+    let config: APIConfig
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Circle().fill(.green).frame(width: 8, height: 8)
+                Text(config.name).font(.headline)
+            }
+            Text(config.baseURL).font(.caption).foregroundStyle(.secondary)
+            Text("模型: \(config.model)").font(.caption).foregroundStyle(.secondary)
+        }
+        .padding(.vertical, 4)
+    }
+}
+
+struct ConfigRow: View {
+    let config: APIConfig
+    let isActive: Bool
+    let testResult: Bool?
+    let onActivate: () -> Void
+    let onTest: () -> Void
+    let onEdit: () -> Void
+    let onDelete: () -> Void
+
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text(config.name).font(.headline)
+                    if isActive {
+                        Text("当前")
+                            .font(.caption)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 2)
+                            .background(.green.opacity(0.1))
+                            .clipShape(Capsule())
+                    }
+                }
+                Text(config.baseURL).font(.caption).foregroundStyle(.secondary)
+                Text(config.model).font(.caption).foregroundStyle(.secondary)
+            }
+            Spacer()
+            if let result = testResult {
+                Image(systemName: result ? "checkmark.circle.fill" : "xmark.circle.fill")
+                    .foregroundStyle(result ? .green : .red)
+            }
+            Menu {
+                if !isActive {
+                    Button("激活", systemImage: "checkmark") { onActivate() }
+                }
+                Button("测试连接", systemImage: "bolt") { onTest() }
+                Button("编辑", systemImage: "pencil") { onEdit() }
+                Divider()
+                Button("删除", systemImage: "trash", role: .destructive) { onDelete() }
+            } label: {
+                Image(systemName: "ellipsis").font(.title3)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.vertical, 4)
+    }
+}
+
 // MARK: - API Config Sheet
 
 struct APIConfigSheet: View {
@@ -109,14 +226,35 @@ struct APIConfigSheet: View {
     var body: some View {
         NavigationStack {
             Form {
+                Section("基本信息") {
+                    TextField("配置名称", text: $name)
+                    TextField("API Base URL", text: $baseURL)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                    SecureField("API Key", text: $apiKey)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                    TextField("模型名称", text: $model)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                }
+
+                Section {
+                    Text("支持兼容 OpenAI API 格式的任意大模型服务")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .formStyle(.grouped)
+            .navigationTitle(config == nil ? "添加配置" : "编辑配置")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("取消") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("保存") {
-                        saveConfig()
-                    }
-                    .disabled(name.isEmpty || baseURL.isEmpty || (config == nil && apiKey.isEmpty) || model.isEmpty)
+                    Button("保存") { saveConfig() }
+                        .disabled(name.isEmpty || baseURL.isEmpty || (config == nil && apiKey.isEmpty) || model.isEmpty)
                 }
             }
             .onAppear {

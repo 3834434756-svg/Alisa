@@ -25,15 +25,15 @@ actor ToolExecutor {
 
         switch toolCall.name {
         case "read_file":
-            return try await readFile(path: args.path)
+            return try await readFile(path: args.path ?? "")
         case "write_file":
-            return try await writeFile(path: args.path, content: args.content ?? "")
+            return try await writeFile(path: args.path ?? "", content: args.content ?? "")
         case "edit_file":
-            return try await editFile(path: args.path, oldText: args.oldText ?? "", newText: args.newText ?? "")
+            return try await editFile(path: args.path ?? "", oldText: args.oldText ?? "", newText: args.newText ?? "")
         case "list_files":
             return try await listFiles(path: args.path ?? ".")
         case "run_command":
-            return try await runCommand(command: args.command, args: args.args ?? [])
+            return try await runCommand(command: args.command ?? "", args: args.args ?? [])
         default:
             throw ToolExecutorError.unknownTool(toolCall.name)
         }

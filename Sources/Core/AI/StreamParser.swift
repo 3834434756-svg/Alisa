@@ -61,8 +61,8 @@ actor StreamParser {
 
             if let delta = choice.delta {
                 handleDelta(delta)
-            } else if let message = choice.message {
-                handleMessage(message)
+            } else {
+                handleMessage(choice.message)
             }
         }
     }
