@@ -414,8 +414,6 @@ struct AIParametersView: View {
         .formStyle(.grouped)
         .navigationTitle("AI 参数")
     }
-
-    private func thinkingDurationDescription(for duration: ThinkingDuration) -> String {
         switch duration {
         case .fast: return "快速响应模式，适合简单代码生成和补全"
         case .balanced: return "平衡模式，适合大多数编程任务"
