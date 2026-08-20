@@ -93,7 +93,7 @@ actor BackupManager {
             for sessionBase64 in sessionsData {
                 if let data = Data(base64Encoded: sessionBase64),
                    let session = try? JSONDecoder().decode(Session.self, from: data) {
-                    try? await db.saveSession(session)
+                    try? await db.updateSession(session)
                 }
             }
         }

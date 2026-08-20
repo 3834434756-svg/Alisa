@@ -463,8 +463,7 @@ struct ChatInputView: View {
         audioEngine = AVAudioEngine()
 
         let request = SFSpeechAudioBufferRecognitionRequest()
-        guard let node = audioEngine.inputNode else { return }
-
+        let node = audioEngine.inputNode
         let recordingFormat = node.outputFormat(forBus: 0)
         node.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { buffer, _ in
             request.append(buffer)
@@ -491,7 +490,7 @@ struct ChatInputView: View {
 
     private func stopRecording() {
         audioEngine.stop()
-        audioEngine.inputNode?.removeTap(onBus: 0)
+        audioEngine.inputNode.removeTap(onBus: 0)
         recognitionTask?.cancel()
         recognitionTask = nil
     }
@@ -695,7 +694,7 @@ struct MarkdownBlockView: View {
 final class ChatViewModel: ObservableObject {
     @Published var messages: [Message] = []
     @Published var currentSession: Session?
-    @Published var currentRoleID: UUID = UUID()
+    @Published var currentRoleID: UUID = RoleManager.shared.builtInRoles.first?.id ?? UUID()
     @Published var selectedSessionID: UUID?
     @Published var isStreaming = false
 
