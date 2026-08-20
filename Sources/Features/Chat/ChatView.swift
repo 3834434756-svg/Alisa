@@ -724,7 +724,7 @@ final class ChatViewModel: ObservableObject {
                                     if !codeBlocks.isEmpty {
                                         self.messages[index].codeBlocks = codeBlocks
                                     }
-                                    self.messages[index].tokenCount = response.usage?.totalTokens ?? 0
+                                    self.messages[index].tokenCount = response.usage.totalTokens
                                 }
                             case .failure(let error):
                                 if let index = self.messages.lastIndex(where: { $0.status == .streaming }) {
