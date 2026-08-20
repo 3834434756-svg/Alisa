@@ -52,7 +52,7 @@ struct Role: Codable, Identifiable, Hashable {
 
 // MARK: - AI Parameters
 
-struct AIParameters: Codable, Equatable {
+struct AIParameters: Codable, Equatable, Hashable {
     var thinkingDuration: ThinkingDuration
     var thinkingIntensity: Int
     var reasoningMode: ReasoningMode
