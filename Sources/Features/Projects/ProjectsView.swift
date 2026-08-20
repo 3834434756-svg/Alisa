@@ -308,7 +308,7 @@ struct ImportProjectSheet: View {
                     .disabled(projectName.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
             }
-.fileImporter(
+            .fileImporter(
                 isPresented: $showingPicker,
                 allowedContentTypes: [.zip]
             ) { result in
@@ -324,12 +324,6 @@ struct ImportProjectSheet: View {
                             errorMessage = error.localizedDescription
                             showingError = true
                         }
-                    }
-                case .failure(let error):
-                    errorMessage = error.localizedDescription
-                    showingError = true
-                }
-            }
                     }
                 case .failure(let error):
                     errorMessage = error.localizedDescription

@@ -580,17 +580,18 @@ struct RoleEditSheet: View {
                 }
             }
         }
+    }
 
     private func saveRole() {
         let specialties = specialtiesText.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
-        var role = Role(
+        let newRole = Role(
             id: role?.id ?? UUID(),
             name: name,
             systemPrompt: systemPrompt,
             specialties: specialties
         )
         Task {
-            try? await roleManager.saveRole(role)
+            try? await roleManager.saveRole(newRole)
             dismiss()
         }
     }
@@ -660,9 +661,9 @@ struct BackupView: View {
                     isCreatingBackup = false
                     password = ""
                 }
-            } message: {
-                Text("可选：设置密码加密备份文件")
             }
+        } message: {
+            Text("可选：设置密码加密备份文件")
         }
     }
 }
