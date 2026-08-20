@@ -436,7 +436,7 @@ struct ChatInputView: View {
                 } label: {
                     Image(systemName: "arrow.up.circle.fill")
                         .font(.title2)
-                        .foregroundStyle(message.trimmingCharacters(in: .whitespaces).isEmpty ? .secondary : .accentColor)
+                        .foregroundStyle(message.trimmingCharacters(in: .whitespaces).isEmpty ? Color.secondary : Color.accentColor)
                 }
                 .buttonStyle(.plain)
                 .disabled(message.trimmingCharacters(in: .whitespaces).isEmpty || viewModel.isStreaming)
@@ -616,15 +616,13 @@ struct MarkdownBlockView: View {
 
     private func renderInline(_ text: String) -> AttributedString {
         var attributed = AttributedString(text)
-        for (range, _) in attributed.runs {
-            // Bold: **text**
-            if let boldRange = findMarkdown(text, pattern: "\\*\\*(.+?)\\*\\*") {
-                attributed[boldRange].inlinePresentationIntent = .stronglyEmphasized
-            }
-            // Inline code: `text`
-            if let codeRange = findMarkdown(text, pattern: "`(.+?)`") {
-                attributed[codeRange].inlinePresentationIntent = .code
-            }
+        // Bold: **text**
+        if let boldRange = findMarkdown(text, pattern: "\\*\\*(.+?)\\*\\*") {
+            attributed[boldRange].inlinePresentationIntent = .stronglyEmphasized
+        }
+        // Inline code: `text`
+        if let codeRange = findMarkdown(text, pattern: "`(.+?)`") {
+            attributed[codeRange].inlinePresentationIntent = .code
         }
         return attributed
     }
@@ -762,7 +760,7 @@ final class ChatViewModel: ObservableObject {
         Task {
             currentSession = try? await sessionRepo.get(id: id)
             selectedSessionID = id
-            messages = try? await messageRepo.getAll(sessionID: id) ?? []
+            messages = (try? await messageRepo.getAll(sessionID: id)) ?? []
         }
     }
 }

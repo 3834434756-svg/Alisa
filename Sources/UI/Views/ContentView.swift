@@ -27,7 +27,7 @@ struct ContentView: View {
     private func initializeApp() async {
         appState.initializationError = nil
         do {
-            try await DatabaseManager.shared.setup()
+            try? await DatabaseManager.shared.initializeBuiltInRoles()
             await ConfigManager.shared.load()
             await RoleManager.shared.load()
             await projectManager.load()

@@ -28,7 +28,7 @@ struct APIConfig: Codable, Identifiable, Equatable {
 
 // MARK: - Role
 
-struct Role: Codable, Identifiable, Equatable {
+struct Role: Codable, Identifiable, Hashable {
     var id: UUID
     var name: String
     var systemPrompt: String

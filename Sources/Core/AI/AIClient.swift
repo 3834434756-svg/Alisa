@@ -337,7 +337,8 @@ final class AIClient {
                                         }
                                     }
                                 }
-                            } else if let message = choice.message {
+                            } else {
+                                let message = choice.message
                                 if let content = message.content {
                                     accumulatedContent += content
                                     Task { @MainActor in onToken(content) }

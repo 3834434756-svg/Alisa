@@ -29,7 +29,7 @@ struct AlisaApp: App {
 
     private func initializeApp() async {
         do {
-            try await DatabaseManager.shared.setup()
+            try? await DatabaseManager.shared.initializeBuiltInRoles()
             await configManager.load()
             await roleManager.load()
             await projectManager.load()
