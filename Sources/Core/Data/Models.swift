@@ -194,6 +194,28 @@ enum CodeBlockAction: String, Codable {
     case create, replace, append, preview
 }
 
+extension CodeBlock {
+    static func extract(from content: String) -> [CodeBlock] {
+        var blocks: [CodeBlock] = []
+        let pattern = "```(\\w+)?\\n([\\s\\S]*?)```"
+        let regex = try? NSRegularExpression(pattern: pattern)
+        let matches = regex?.matches(in: content, range: NSRange(content.startIndex..., in: content)) ?? []
+
+        for match in matches {
+            let languageRange = match.range(at: 1)
+            let codeRange = match.range(at: 2)
+
+            let language = languageRange.location != NSNotFound
+                ? String(content[Range(languageRange, in: content)!])
+                : "text"
+            let code = String(content[Range(codeRange, in: content)!])
+
+            blocks.append(CodeBlock(language: language, code: code))
+        }
+        return blocks
+    }
+}
+
 // MARK: - File Reference
 
 struct FileReference: Codable, Equatable {
