@@ -1,5 +1,5 @@
 import Foundation
-import GRDB
+@preconcurrency import GRDB
 
 actor DatabaseManager {
     static let shared = DatabaseManager()
