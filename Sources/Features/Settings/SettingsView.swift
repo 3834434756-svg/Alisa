@@ -633,7 +633,7 @@ struct BackupView: View {
                     // File picker for backup
                 } label: {
                     if isRestoringBackup {
-                        ProgressView("恢复中...", value: backupProgress, total: 1.0)
+                        ProgressView("恢复中...")
                     } else {
                         Label("选择备份文件", systemImage: "square.and.arrow.down")
                     }
