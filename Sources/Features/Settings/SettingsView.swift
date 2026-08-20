@@ -503,8 +503,9 @@ struct RoleManagementView: View {
         }
         .fileImporter(isPresented: $showingImportExport, allowedContentTypes: [.json]) { result in
             switch result {
-            case .success(var urlList):
-                if let url = urlList.first {
+            case .success(let urls):
+                let urlArray = urls as? [URL] ?? [urls as! URL]
+                if let url = urlArray.first {
                     Task {
                         let data = try? Data(contentsOf: url)
                         if let data = data {

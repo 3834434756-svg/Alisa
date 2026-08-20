@@ -313,8 +313,9 @@ struct ImportProjectSheet: View {
                 allowedContentTypes: [.zip]
             ) { result in
                 switch result {
-                case .success(var urlList):
-                    guard let url = urlList.first else { return }
+                case .success(let urls):
+                    let urlArray = urls as? [URL] ?? [urls as! URL]
+                    guard let url = urlArray.first else { return }
                     Task {
                         do {
                             _ = try await projectManager.importProject(from: url, name: projectName)

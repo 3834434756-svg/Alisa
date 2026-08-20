@@ -1,4 +1,7 @@
 import Foundation
+#if canImport(Foundation.Process)
+import Foundation.Process
+#endif
 
 // MARK: - Tool Executor
 
