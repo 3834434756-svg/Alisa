@@ -28,30 +28,87 @@ struct SettingsView: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                Section("基本信息") {
-                    TextField("配置名称", text: $name)
-                    TextField("API Base URL", text: $baseURL)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                    SecureField("API Key", text: $apiKey)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                    TextField("模型名称", text: $model)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                }
+            if UIDevice.current.userInterfaceIdiom == .pad {
+                SettingsSplitView(selectedTab: $selectedTab)
+            } else {
+                SettingsList()
+            }
+        }
+    }
 
-                Section {
-                    Text("支持兼容 OpenAI API 格式的任意大模型服务")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+    @ViewBuilder
+    private func SettingsList() -> some View {
+        List {
+            ForEach(SettingsTab.allCases, id: \.self) { tab in
+                NavigationLink {
+                    settingsContent(for: tab)
+                } label: {
+                    Label(tab.rawValue, systemImage: tab.systemImage)
                 }
             }
-            .formStyle(.grouped)
-            .navigationTitle(config == nil ? "添加配置" : "编辑配置")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
+        }
+        .navigationTitle("设置")
+    }
+
+    @ViewBuilder
+    private func settingsContent(for tab: SettingsTab) -> some View {
+        switch tab {
+        case .api: APIConfigView()
+        case .parameters: AIParametersView()
+        case .roles: RoleManagementView()
+        case .backup: BackupView()
+        case .about: AboutView()
+        }
+    }
+}
+
+struct SettingsSplitView: View {
+    @Binding var selectedTab: SettingsTab
+
+    var body: some View {
+        HSplitView {
+            List(selection: $selectedTab) {
+                ForEach(SettingsTab.allCases, id: \.self) { tab in
+                    Label(tab.rawValue, systemImage: tab.systemImage)
+                        .tag(tab)
+                }
+            }
+            .listStyle(.sidebar)
+            .frame(minWidth: 200, idealWidth: 250)
+
+            settingsDetail(for: selectedTab)
+        }
+        .navigationTitle("设置")
+    }
+
+    @ViewBuilder
+    private func settingsDetail(for tab: SettingsTab) -> some View {
+        switch tab {
+        case .api: APIConfigView()
+        case .parameters: AIParametersView()
+        case .roles: RoleManagementView()
+        case .backup: BackupView()
+        case .about: AboutView()
+        }
+    }
+}
+
+// MARK: - API Config Sheet
+
+struct APIConfigSheet: View {
+    let config: APIConfig?
+    @EnvironmentObject var configManager: ConfigManager
+    @Environment(\.dismiss) var dismiss
+    @State private var name = ""
+    @State private var baseURL = ""
+    @State private var apiKey = ""
+    @State private var model = ""
+    @State private var showingError = false
+    @State private var errorMessage = ""
+
+    var body: some View {
+        NavigationStack {
+            Form {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("取消") { dismiss() }
                 }

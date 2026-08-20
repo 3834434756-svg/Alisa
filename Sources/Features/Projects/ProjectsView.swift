@@ -159,7 +159,6 @@ struct ProjectCard: View {
         switch template {
         case .swiftPackage: return "swift"
         case .htmlSite: return "globe"
-        case .viteVue, .nextJS, .reactNative: return "leaf"
         case .pythonScript: return "python"
         default: return "folder"
         }
@@ -258,9 +257,6 @@ struct TemplateRow: View {
         case .empty: return "doc"
         case .swiftPackage: return "swift"
         case .htmlSite: return "globe"
-        case .viteVue: return "leaf"
-        case .nextJS: return "hexagon"
-        case .reactNative: return "phone.gen3"
         case .pythonScript: return "python"
         }
     }
@@ -270,9 +266,6 @@ struct TemplateRow: View {
         case .empty: return "空白项目，从零开始"
         case .swiftPackage: return "Swift Package 标准结构"
         case .htmlSite: return "静态网站 (HTML/CSS/JS)"
-        case .viteVue: return "Vite + Vue 3 单页应用"
-        case .nextJS: return "Next.js 全栈 React 框架"
-        case .reactNative: return "React Native 跨平台应用"
         case .pythonScript: return "Python 脚本项目"
         }
     }
